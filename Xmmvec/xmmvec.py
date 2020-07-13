@@ -7,7 +7,7 @@
 # ----------------------------------------------------------------------------
 
 import os
-from os.path import abspath, dirname, isfile, isdir
+from os.path import abspath, dirname, isfile, isdir, splitext
 import pandas as pd
 import numpy as np
 import altair as alt
@@ -164,12 +164,18 @@ def make_figure(ranks_pd: pd.DataFrame, o_ranks_explored: str,
         name="Conditional", init={'conditional': 'conditionals'})
 
     max_rank1 = int(ranks_st[conditionals_1].max())
+    init1 = 10
+    if p_pair_number > max_rank1:
+        init1 = max_rank1
     slider1 = alt.binding_range(min=1, max=max_rank1, step=1, name='max. rank of %s per each %s:' % (omic2, omic1))
-    selector1 = alt.selection_single(name="cutoff1", fields=['cutoff'], bind=slider1, init={'cutoff': p_pair_number})
+    selector1 = alt.selection_single(name="cutoff1", fields=['cutoff'], bind=slider1, init={'cutoff': init1})
 
     max_rank2 = int(ranks_st[conditionals_2].max())
+    init2 = 10
+    if p_pair_number > max_rank2:
+        init2 = max_rank2
     slider2 = alt.binding_range(min=1, max=max_rank2, step=1,name='max. rank of %s per each %s:' % (omic1, omic2))
-    selector2 = alt.selection_single(name="cutoff2", fields=['cutoff2'], bind=slider2, init={'cutoff2': p_pair_number})
+    selector2 = alt.selection_single(name="cutoff2", fields=['cutoff2'], bind=slider2, init={'cutoff2': init2})
 
     mlt1 = alt.selection_multi(fields=[omic1], toggle=True)
     mlt2 = alt.selection_multi(fields=[omic2], toggle=True)
@@ -263,5 +269,12 @@ def xmmvec(
     ranks_pd = add_ranks(ranks_pd, omic1)
     ranks_pd = add_ranks(ranks_pd, omic2)
 
-    make_figure(ranks_pd, abspath(o_ranks_explored), p_pair_number,
+    if o_ranks_explored:
+        if o_ranks_explored.endswith('.html'):
+            ranks_explored = abspath(o_ranks_explored)
+        else:
+            raise IOError('Output file name must end with ".html')
+    else:
+        ranks_explored = '%s-p%s-n%s.html' % (splitext(i_ranks_path)[0], p_min_probability, p_pair_number)
+    make_figure(ranks_pd, ranks_explored, p_pair_number,
                 omic1_column_new, omic2_column_new, omic1, omic2)
