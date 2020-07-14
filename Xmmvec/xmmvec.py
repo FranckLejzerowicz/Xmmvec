@@ -39,9 +39,76 @@ def get_metadata(omic_metadata_fp: str, p_omic_column: str, omic: str) -> (pd.Da
             dtype={line.split('\t')[0]: str}
         )
         omic_metadata = omic_metadata.rename(columns={omic_metadata.columns.tolist()[0]: omic})
+        omic_metadata.columns = [x.replace('\n', '') for x in omic_metadata.columns]
         if p_omic_column and p_omic_column in omic_metadata.columns.tolist()[1:]:
             omic_column = p_omic_column
     return omic_metadata, omic_column
+
+
+def get_sign_val(p_omic_value: str) -> list:
+    signs_vals = []
+    for p_omic_val in p_omic_value:
+        if p_omic_val[:2] in ['<=', '>=']:
+            sign = p_omic_val[:2]
+            val = p_omic_val[2:]
+        elif p_omic_val[0] in ['<', '>']:
+            sign = p_omic_val[0]
+            val = p_omic_val[1:]
+        try:
+            signs_vals.append([sign, float(val)])
+        except TypeError:
+            raise TypeError('%s in %s must be numeric' % (val, p_omic_value))
+    return signs_vals
+
+
+def get_filter(omic_metadata: pd.DataFrame, p_omic_filt: str, p_omic_value: str):
+    if p_omic_filt and p_omic_value:
+        if p_omic_filt in omic_metadata.columns:
+            pass
+        elif p_omic_filt.replace('\\n', '') in omic_metadata.columns:
+            p_omic_filt = p_omic_filt.replace('\\n', '')
+        else:
+            return omic_metadata
+        omic_metadata_col = omic_metadata[p_omic_filt].copy()
+        if len([1 for x in p_omic_value if x[0] in ['<', '>']]):
+            signs_vals = get_sign_val(p_omic_value)
+            filt = get_col_bool_sign(omic_metadata_col, signs_vals)
+        else:
+            if not len([x for x in p_omic_value if x in omic_metadata_col.values]):
+                raise IndexError('None of "%s" in column "%s"' % (', '.join(list(p_omic_value)), p_omic_filt))
+            filt = omic_metadata_col.isin([x for x in p_omic_value])
+        return omic_metadata[filt]
+    else:
+        return omic_metadata
+
+
+def get_col_bool_sign(omic_metadata_col: pd.Series, signs_vals: list) -> pd.Series:
+
+    if signs_vals[0][0] == '<':
+        omic_metadata_bool = omic_metadata_col.astype(float) < signs_vals[0][1]
+    elif signs_vals[0][0] == '>':
+        omic_metadata_bool = omic_metadata_col.astype(float) > signs_vals[0][1]
+    elif signs_vals[0][0] == '<=':
+        omic_metadata_bool = omic_metadata_col.astype(float) <= signs_vals[0][1]
+    elif signs_vals[0][0] == '>=':
+        omic_metadata_bool = omic_metadata_col.astype(float) >= signs_vals[0][1]
+    else:
+        raise IOError("Sign %s none of ['<', '>', '<=', '>=']" % signs_vals[0][0])
+
+    if len(signs_vals) == 2:
+        if signs_vals[1][0] == '<':
+            omic_metadata_bool2 = omic_metadata_col.astype(float) < signs_vals[1][1]
+        elif signs_vals[1][0] == '>':
+            omic_metadata_bool2 = omic_metadata_col.astype(float) > signs_vals[1][1]
+        elif signs_vals[1][0] == '<=':
+            omic_metadata_bool2 = omic_metadata_col.astype(float) <= signs_vals[1][1]
+        elif signs_vals[1][0] == '>=':
+            omic_metadata_bool2 = omic_metadata_col.astype(float) >= signs_vals[1][1]
+        else:
+            raise IOError("Sign %s none of ['<', '>', '<=', '>=']" % signs_vals[1][0])
+        return omic_metadata_bool & omic_metadata_bool2
+    else:
+        return omic_metadata_bool
 
 
 def merge_metadata(ranks_pd: pd.DataFrame,
@@ -49,7 +116,7 @@ def merge_metadata(ranks_pd: pd.DataFrame,
                    omic_column: str, omic: str) -> (pd.DataFrame, str):
     if omic_column:
         ranks_pd = ranks_pd.merge(omic_metadata[[omic, omic_column]], on=omic, how='left')
-        omic_column_new = '%s_%s' % (omic_column, omic)
+        omic_column_new = '%s:\n%s' % (omic, omic_column)
         ranks_pd.rename(columns={omic_column: omic_column_new}, inplace=True)
     else:
         omic_column_new = ''
@@ -99,7 +166,7 @@ def get_sorted(ranks_st: pd.DataFrame, omic_column: str, omic: str) -> list:
     if omic_column:
         sorted_omic = [
             feature for group in ranks_st[omic_column].unique().tolist()
-            for feature in sorted(ranks_st.query('%s == "%s"' % (omic_column, group))[omic].unique())]
+            for feature in sorted(ranks_st.loc[ranks_st[omic_column] == group, omic].unique())]
     return sorted_omic
 
 
@@ -111,12 +178,12 @@ def get_bar_chart(ranks_st: pd.DataFrame, sorted_omic: list,
 
     if omic == omic1:
         x = alt.X('%s:N' % omic1, sort=sorted_omic, axis=None)
-        y = alt.Y('mean(rank):Q', axis=alt.Axis(titleFontSize=6))
+        y = alt.Y('mean(rank):Q', axis=alt.Axis(titleFontSize=8))
         width = x_size
         height = 50
         conditionals_omic = conditionals_1
     else:
-        x = alt.X('mean(rank):Q', axis=alt.Axis(titleFontSize=6, orient='top'))
+        x = alt.X('mean(rank):Q', axis=alt.Axis(titleFontSize=8, orient='top'))
         y = alt.Y('%s:N' % omic2, sort=sorted_omic, axis=None)
         width = 50
         height = y_size
@@ -147,7 +214,7 @@ def get_bar_chart(ranks_st: pd.DataFrame, sorted_omic: list,
 
 
 def make_figure(ranks_pd: pd.DataFrame, o_ranks_explored: str,
-                p_pair_number: int, omic1_column: str,
+                p_pair_number: int, p_color_palette: str, omic1_column: str,
                 omic2_column: str, omic1: str, omic2: str) -> None:
 
     conditionals_1 = 'conditionals_per_%s' % omic1
@@ -182,16 +249,16 @@ def make_figure(ranks_pd: pd.DataFrame, o_ranks_explored: str,
     sorted_omic1 = get_sorted(ranks_st, omic1_column, omic1)
     sorted_omic2 = get_sorted(ranks_st, omic2_column, omic2)
 
-    x_size = len(sorted_omic1) * 4
-    y_size = len(sorted_omic2) * 4
+    x_size = len(sorted_omic1) * 6
+    y_size = len(sorted_omic2) * 6
     rect = alt.Chart(ranks_st).mark_rect().encode(
         x=alt.X('%s:O' % omic1, sort=sorted_omic1,
-                axis=alt.Axis(labelOverlap=False, labelFontSize=8,
-                              orient='top', labelAngle=45, titleFontSize=6)),
+                axis=alt.Axis(labelOverlap=False, labelFontSize=6,
+                              orient='top', labelAngle=45, titleFontSize=0)),
         y=alt.Y('%s:O' % omic2, sort=sorted_omic2,
-                axis=alt.Axis(labelOverlap=False, labelFontSize=8, titleFontSize=6)),
-        color=alt.Color('rank:Q', legend=alt.Legend(orient='left'),
-                        scale=alt.Scale(scheme='rainbow')),
+                axis=alt.Axis(labelOverlap=False, labelFontSize=6, titleFontSize=0)),
+        color=alt.Color('rank:Q', legend=alt.Legend(orient='left'), sort="descending",
+                        scale=alt.Scale(scheme=p_color_palette)),
         tooltip=[omic1, omic2, 'conditional', 'rank',
                  conditionals_1, conditionals_2]
     ).transform_filter(
@@ -221,14 +288,15 @@ def make_figure(ranks_pd: pd.DataFrame, o_ranks_explored: str,
     ).resolve_legend(
         color="independent", size="independent"
     ).configure_axis(
-        labelLimit=300, labelFontSize=6,
+        labelLimit=300, labelFontSize=8,
     ).configure_legend(
-        labelLimit=1000, labelFontSize=6, titleFontSize=6, symbolSize=10
+        labelLimit=1000, labelFontSize=8, titleFontSize=8, symbolSize=12, columns=3
     )
 
     if not isdir(dirname(o_ranks_explored)):
         os.makedirs(dirname(o_ranks_explored))
     chart.save(o_ranks_explored)
+    print('-> Written:', o_ranks_explored)
 
 
 def xmmvec(
@@ -237,30 +305,40 @@ def xmmvec(
     i_tree_taxonomy: str,
     p_omic1_metadata: str,
     p_omic1_column: str,
+    p_omic1_filt: str,
+    p_omic1_value: str,
     p_omic1_name: str,
     p_omic2_metadata: str,
     p_omic2_column: str,
+    p_omic2_filt: str,
+    p_omic2_value: str,
     p_omic2_name: str,
     p_min_probability: float,
-    p_pair_number: int
+    p_pair_number: int,
+    p_color_palette: str
 ):
     i_ranks_path = check_path(i_ranks_path)
-    ranks_pd = pd.read_csv(i_ranks_path, header=0, index_col=0, sep='\t')
-    ranks_pd[ranks_pd < p_min_probability] = np.nan
-    ranks_pd = ranks_pd.loc[(~ranks_pd.isna().all(1)),
-                            (~ranks_pd.isna().all())]
 
     omic1 = get_name(p_omic1_name, 'omic1')
     omic2 = get_name(p_omic2_name, 'omic2')
-
-    ranks_pd = ranks_pd.unstack().reset_index().rename(
-        columns={'level_0': omic1, 'featureid': omic2, 0: 'conditionals'})
 
     if i_tree_taxonomy:
         i_tree_taxonomy = check_path(i_tree_taxonomy)
 
     omic1_metadata, omic1_column = get_metadata(p_omic1_metadata, p_omic1_column, omic1)
     omic2_metadata, omic2_column = get_metadata(p_omic2_metadata, p_omic2_column, omic2)
+
+    omic1_metadata = get_filter(omic1_metadata, p_omic1_filt, p_omic1_value)
+    omic2_metadata = get_filter(omic2_metadata, p_omic2_filt, p_omic2_value)
+    ranks_pd = pd.read_csv(i_ranks_path, header=0, index_col=0, sep='\t')
+    ranks_pd = ranks_pd.loc[
+        list(set(omic2_metadata[omic2]) & set(ranks_pd.index)),
+        list(set(omic1_metadata[omic1]) & set(ranks_pd.columns))
+    ]
+    ranks_pd[ranks_pd < p_min_probability] = np.nan
+    ranks_pd = ranks_pd.loc[(~ranks_pd.isna().all(1)), (~ranks_pd.isna().all())]
+    ranks_pd = ranks_pd.unstack().reset_index().rename(
+        columns={'level_0': omic1, 'featureid': omic2, 0: 'conditionals'})
 
     ranks_pd, omic1_column_new = merge_metadata(ranks_pd, omic1_metadata, omic1_column, omic1)
     ranks_pd, omic2_column_new = merge_metadata(ranks_pd, omic2_metadata, omic2_column, omic2)
@@ -276,5 +354,5 @@ def xmmvec(
             raise IOError('Output file name must end with ".html')
     else:
         ranks_explored = '%s-p%s-n%s.html' % (splitext(i_ranks_path)[0], p_min_probability, p_pair_number)
-    make_figure(ranks_pd, ranks_explored, p_pair_number,
+    make_figure(ranks_pd, ranks_explored, p_pair_number, p_color_palette,
                 omic1_column_new, omic2_column_new, omic1, omic2)
