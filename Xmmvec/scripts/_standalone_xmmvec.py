@@ -18,7 +18,7 @@ from Xmmvec import __version__
     help="Path to mmvec ranks."
 )
 @click.option(
-    "-o", "--o-ranks-explored", required=True,
+    "-o", "--o-ranks-explored", required=False,
     help="Path to the output explorer visualization."
 )
 @click.option(
