@@ -28,7 +28,7 @@ features and omic2 features
 * Output:
   - `-o, --o-ranks-explored` (optional): Xmmvec visualization output (must end with be .html)  
 
-* Metadata
+* Metadata:
   - `-m1, --p-omic1-metadata` and `-m1, --p-omic1-metadata` (optional): feature metadata tables 
   for 'omic1' and 'omic2' features. Must contains the passed columns (next option) or ignored.
   - `-c1, --p-omic1-column` and `-c2, --p-omic2-column` (optional): columns of the respective
@@ -37,10 +37,17 @@ features and omic2 features
   and 'omic2' features (and label the interactive selectors). This is invented and maz not match
   the data (e.g. "*myGenomes*" would work). 
 
+* Filtering (based on metadata):
+  - `-f1, --p-omic1-filt` and `-f2, --p-omic2-filt` (optional): column of the 'omic1' (and/or 'omic2') 
+  features metadata table passed to `-m1, --p-omic1-metadata` (and/or `-m2, --p-omic2-metadata`) that  
+  is used for features filtering.  
+  - `-v1, --p-omic1-value` and `-v2, --p-omic2-value` (optional): factor(s) (or threshold(s)) for columns
+  `-f1, --p-omic1-filt` (and/or `-f2, --p-omic2-filt`) used to filter the features.
+
 The names of the paired omics can be invented (using `-n1` and `-n2`), 
 but note that the features in:
-  - the columns of the matrix will be associated with options `1` (`-m1`, `-c1`, `-n1`).
-  - the rows of the matrix will be associated with options `2` (`-m2`, `-c2`, `-n2`).
+  - the columns of the matrix will be associated with options `1` (`-m1`, `-c1`, `-n1`, `-f1`, `-v1`).
+  - the rows of the matrix will be associated with options `2` (`-m2`, `-c2`, `-n2`, `-f2`, `-v2`).
 
 ## Outputs
 
@@ -72,7 +79,6 @@ of *omic1*, from the least to the most probably co-occurring features of *omic2*
 of *omic2*, from the least to the most probably co-occurring features of *omic1*.     
 
 
-
 ## Example
 
 If no output file name is specified, the input filename is stripped from its extension,
@@ -83,7 +89,7 @@ and the `.html` extension.
 
     ```
     Xmmvec \
-        -r Xmmvec/tests/example/ranks.tsv
+        -r Xmmvec/tests/example/ranks.tsv \
         -p 1 \
         -n 100 \
         -n1 omic1 \
@@ -100,39 +106,50 @@ and the `.html` extension.
 ### Optional arguments
 
 ```
-  -r, --i-ranks-path TEXT        Path to mmvec ranks.  [required]
-  -o, --o-ranks-explored TEXT    Path to the output explorer visualization.
-                                 [required]
+  -r, --i-ranks-path TEXT         Path to mmvec ranks.  [required]
+  -o, --o-ranks-explored TEXT     Path to the output explorer visualization.
+  -t, --i-tree-taxonomy TEXT      Path to a tree which internal nodes are
+                                  labeled.
 
-  -t, --i-tree-taxonomy TEXT     Path to a tree which internal nodes are
-                                 labeled.
+  -m1, --p-omic1-metadata TEXT    {Path to the metadata table for omic1
+                                  features (columns of the ranks matrix).
+                                  [default: ]
 
-  -m1, --p-omic1-metadata TEXT   {Path to the metadata table for omic1
-                                 features (columns of the ranks matrix).
-                                 [default: ]
+  -c1, --p-omic1-column TEXT      Column from metadata to use for
+                                  stratification of omic1 features.
 
-  -c1, --p-omic1-column TEXT     Column from metadata to use for
-                                 stratification of omic1 features.  [default:
-                                 ]
+  -f1, --p-omic1-filt TEXT        Column from metadata `-m1` to use for
+                                  filtering based on values of `-f1`.
 
-  -n1, --p-omic1-name TEXT       Name for omic1 features.  [default: omic1]
-  -m2, --p-omic2-metadata TEXT   {Path to the metadata table for omic2
-                                 features (rows of the ranks matrix).
-                                 [default: ]
+  -v1, --p-omic1-value TEXT       Filter omic1 features based on column passed
+                                  to `-f1`.
 
-  -c2, --p-omic2-column TEXT     Column from metadata to use for
-                                 stratification of omic2 features.  [default:
-                                 ]
+  -n1, --p-omic1-name TEXT        Name for omic1 features.  [default: omic1]
+  -m2, --p-omic2-metadata TEXT    {Path to the metadata table for omic2
+                                  features (rows of the ranks matrix).
 
-  -n2, --p-omic2-name TEXT       Name for omic2 features.  [default: omic2]
-  -p, --p-min-probability FLOAT  Minimum conditional probability.  [default:
-                                 0.0]
+  -c2, --p-omic2-column TEXT      Column from metadata to use for
+                                  stratification of omic2 features.
 
-  -n, --p-pair-number INTEGER    initial number of co-occurrences per feature.
-                                 [default: 10]
+  -f2, --p-omic2-filt TEXT        Column from metadata `-m2` to use for
+                                  filtering based on values of `-f2`.
 
-  --version                      Show the version and exit.
-  --help                         Show this message and exit.
+  -v2, --p-omic2-value TEXT       Filter omic2 features based on column passed
+                                  to `-f2`.
+
+  -n2, --p-omic2-name TEXT        Name for omic2 features.  [default: omic2]
+  -p, --p-min-probability FLOAT   Minimum conditional probability.  [default:
+                                  0.0]
+
+  -n, --p-pair-number INTEGER     initial number of co-occurrences per
+                                  feature.  [default: 10]
+
+  -col, --p-color-palette [blues|greens|oranges|reds|purples|greys|viridis|magma|inferno|plasma|bluegreen|bluepurple|greenblue|orangered|purplebluegreen|purpleblue|purplered|redpurple|yellowgreenblue|yellowgreen|yelloworangebrown|yelloworangered|blueorange|brownbluegreen|purplegreen|pinkyellowgreen|purpleorange|redblue|redgrey|redyellowblue|redyellowgreen|spectral|rainbow|sinebow]
+                                  Color palette for the heatmap.  [default:
+                                  rainbow]
+
+  --version                       Show the version and exit.
+  --help                          Show this message and exit.
 ```
 
 
