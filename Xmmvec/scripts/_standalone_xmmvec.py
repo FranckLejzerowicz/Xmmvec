@@ -27,7 +27,7 @@ from Xmmvec import __version__
 )
 @click.option(
     "-m1", "--p-omic1-metadata", required=False, default="",
-    show_default=True, help="{Path to the metadata table for omic1 features "
+    help="{Path to the metadata table for omic1 features "
                             "(columns of the ranks matrix)."
 )
 @click.option(

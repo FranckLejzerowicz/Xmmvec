@@ -113,7 +113,6 @@ and the `.html` extension.
 
   -m1, --p-omic1-metadata TEXT    {Path to the metadata table for omic1
                                   features (columns of the ranks matrix).
-                                  [default: ]
 
   -c1, --p-omic1-column TEXT      Column from metadata to use for
                                   stratification of omic1 features.

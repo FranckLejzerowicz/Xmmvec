@@ -241,22 +241,37 @@ def make_figure(ranks_pd: pd.DataFrame, o_ranks_explored: str,
     conditionals = ['conditionals', 'ranked_conditionals', conditionals_1, conditionals_2]
     conditionals_radio = alt.binding_radio(options=conditionals)
     conditionals_select = alt.selection_single(
-        fields=['conditional'], bind=conditionals_radio,
-        name="Conditional", init={'conditional': 'conditionals'})
+        fields=['conditional'],
+        bind=conditionals_radio,
+        name="Conditional",
+        init={'conditional': 'conditionals'}
+    )
 
     max_rank1 = int(ranks_st[conditionals_1].max())
     init1 = 10
     if p_pair_number > max_rank1:
         init1 = max_rank1
-    slider1 = alt.binding_range(min=1, max=max_rank1, step=1, name='max. rank of %s per each %s:' % (omic2, omic1))
-    selector1 = alt.selection_single(name="cutoff1", fields=['cutoff'], bind=slider1, init={'cutoff': init1})
+    slider1 = alt.binding_range(
+        min=1, max=max_rank1, step=1,
+        name='max. rank of %s per each %s:' % (omic2, omic1)
+    )
+    selector1 = alt.selection_single(
+        name="cutoff1", fields=['cutoff'],
+        bind=slider1, init={'cutoff': init1}
+    )
 
     max_rank2 = int(ranks_st[conditionals_2].max())
     init2 = 10
     if p_pair_number > max_rank2:
         init2 = max_rank2
-    slider2 = alt.binding_range(min=1, max=max_rank2, step=1,name='max. rank of %s per each %s:' % (omic1, omic2))
-    selector2 = alt.selection_single(name="cutoff2", fields=['cutoff2'], bind=slider2, init={'cutoff2': init2})
+    slider2 = alt.binding_range(
+        min=1, max=max_rank2, step=1,
+        name='max. rank of %s per each %s:' % (omic1, omic2)
+    )
+    selector2 = alt.selection_single(
+        name="cutoff2", fields=['cutoff2'],
+        bind=slider2, init={'cutoff2': init2}
+    )
 
     mlt1 = alt.selection_multi(fields=[omic1], toggle=True)
     mlt2 = alt.selection_multi(fields=[omic2], toggle=True)
@@ -267,12 +282,14 @@ def make_figure(ranks_pd: pd.DataFrame, o_ranks_explored: str,
     y_size = len(sorted_omic2) * 6
     rect = alt.Chart(ranks_st).mark_rect().encode(
         x=alt.X('%s:O' % omic1, sort=sorted_omic1,
-                axis=alt.Axis(labelOverlap=False, labelFontSize=6,
-                              orient='top', labelAngle=45, titleFontSize=0)),
+                axis=alt.Axis(
+                    labelOverlap=False, labelFontSize=6,
+                    orient='top', labelAngle=45, titleFontSize=0)),
         y=alt.Y('%s:O' % omic2, sort=sorted_omic2,
-                axis=alt.Axis(labelOverlap=False, labelFontSize=6, titleFontSize=0)),
-        color=alt.Color('rank:Q', legend=alt.Legend(orient='left'), sort="descending",
-                        scale=alt.Scale(scheme=p_color_palette)),
+                axis=alt.Axis(
+                    labelOverlap=False, labelFontSize=6, titleFontSize=0)),
+        color=alt.Color('rank:Q', legend=alt.Legend(orient='left'),
+                        sort="descending", scale=alt.Scale(scheme=p_color_palette)),
         tooltip=[omic1, omic2, 'conditional', 'rank',
                  conditionals_1, conditionals_2]
     ).transform_filter(
@@ -305,7 +322,9 @@ def make_figure(ranks_pd: pd.DataFrame, o_ranks_explored: str,
     ).configure_axis(
         labelLimit=300, labelFontSize=8,
     ).configure_legend(
-        labelLimit=1000, labelFontSize=8, titleFontSize=8, symbolSize=12, columns=3
+        labelLimit=1000, labelFontSize=8,
+        titleFontSize=8, symbolSize=12,
+        columns=3
     ).properties(
         title={
             "text": text,
@@ -350,6 +369,8 @@ def xmmvec(
     if i_tree_taxonomy:
         i_tree_taxonomy = check_path(i_tree_taxonomy)
 
+    omic1_metadata = pd.DataFrame()
+    omic2_metadata = pd.DataFrame()
     if p_omic1_metadata or p_omic2_metadata:
         print('Read metadata...', end='')
         omic1_metadata, omic1_column = get_metadata(p_omic1_metadata, p_omic1_column, omic1)
@@ -369,8 +390,6 @@ def xmmvec(
         print('done.')
 
     print('Cast ranks as column formatted...', end='')
-
-
     ranks_pd[ranks_pd < p_min_probability] = np.nan
     ranks_pd = ranks_pd.loc[(~ranks_pd.isna().all(1)), (~ranks_pd.isna().all())]
     ranks_pd = ranks_pd.unstack().reset_index().rename(
@@ -380,6 +399,8 @@ def xmmvec(
     ranks_pd = add_ranks(ranks_pd, omic2)
     print('done.')
 
+    omic1_column_new = ''
+    omic2_column_new = ''
     if omic1_metadata.shape[0] or omic2_metadata.shape[0]:
         print('Merge metadata...', end='')
         ranks_pd, omic1_column_new = merge_metadata(ranks_pd, omic1_metadata, omic1_column, omic1)
