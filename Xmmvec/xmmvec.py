@@ -340,6 +340,7 @@ def xmmvec(
     p_color_palette: str
 ):
     i_ranks_path = check_path(i_ranks_path)
+    ranks_pd = pd.read_csv(i_ranks_path, header=0, index_col=0, sep='\t')
     print('Input matrix:', i_ranks_path)
     omic1 = get_name(p_omic1_name, 'omic1')
     omic2 = get_name(p_omic2_name, 'omic2')
@@ -353,21 +354,24 @@ def xmmvec(
     if p_omic1_metadata or p_omic2_metadata:
         print('Read metadata...', end='')
         omic1_metadata, omic1_column = get_metadata(p_omic1_metadata, p_omic1_column, omic1)
+        print(omic1_metadata.iloc[:3,:3])
         omic2_metadata, omic2_column = get_metadata(p_omic2_metadata, p_omic2_column, omic2)
         print('done.')
 
     if p_omic1_filt or p_omic1_filt:
-        print('Filter metadata...', end='')
+        print('Filter using metadata...', end='')
         omic1_metadata = get_filter(omic1_metadata, p_omic1_filt, p_omic1_value)
         omic2_metadata = get_filter(omic2_metadata, p_omic2_filt, p_omic2_value)
+        print(omic1_metadata.iloc[:3,:3])
+        ranks_pd = ranks_pd.loc[
+            list(set(omic2_metadata[omic2]) & set(ranks_pd.index)),
+            list(set(omic1_metadata[omic1]) & set(ranks_pd.columns))
+        ]
         print('done.')
 
     print('Cast ranks as column formatted...', end='')
-    ranks_pd = pd.read_csv(i_ranks_path, header=0, index_col=0, sep='\t')
-    ranks_pd = ranks_pd.loc[
-        list(set(omic2_metadata[omic2]) & set(ranks_pd.index)),
-        list(set(omic1_metadata[omic1]) & set(ranks_pd.columns))
-    ]
+
+
     ranks_pd[ranks_pd < p_min_probability] = np.nan
     ranks_pd = ranks_pd.loc[(~ranks_pd.isna().all(1)), (~ranks_pd.isna().all())]
     ranks_pd = ranks_pd.unstack().reset_index().rename(
