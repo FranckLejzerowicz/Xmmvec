@@ -181,13 +181,11 @@ def get_bar_chart(ranks_st: pd.DataFrame, sorted_omic: list,
         y = alt.Y('mean(rank):Q', axis=alt.Axis(titleFontSize=8))
         width = x_size
         height = 50
-        conditionals_omic = conditionals_1
     else:
         x = alt.X('mean(rank):Q', axis=alt.Axis(titleFontSize=8, orient='top'))
         y = alt.Y('%s:N' % omic2, sort=sorted_omic, axis=None)
         width = 50
         height = y_size
-        conditionals_omic = conditionals_2
 
     if omic_column:
         color = alt.condition(mlt, omic_column, alt.ColorValue("grey"))
@@ -197,7 +195,8 @@ def get_bar_chart(ranks_st: pd.DataFrame, sorted_omic: list,
     bar_omic = alt.Chart(ranks_st).mark_bar().encode(
         x=x, y=y, color=color, tooltip=[
             omic, 'mean(rank)', 'stdev(rank)',
-            'min(%s)' % conditionals_omic]
+            'min(%s)' % conditionals_1,
+            'min(%s)' % conditionals_2]
     ).add_selection(
         mlt, selector1, selector2
     ).transform_filter(
