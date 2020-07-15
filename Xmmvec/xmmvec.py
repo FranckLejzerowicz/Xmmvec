@@ -215,7 +215,9 @@ def get_bar_chart(ranks_st: pd.DataFrame, sorted_omic: list,
 
 def make_figure(ranks_pd: pd.DataFrame, o_ranks_explored: str,
                 p_pair_number: int, p_color_palette: str, omic1_column: str,
-                omic2_column: str, omic1: str, omic2: str) -> None:
+                omic2_column: str, omic1: str, omic2: str,
+                p_omic1_filt: str, p_omic1_value: str,
+                p_omic2_filt: str, p_omic2_value: str) -> None:
 
     conditionals_1 = 'conditionals_per_%s' % omic1
     conditionals_2 = 'conditionals_per_%s' % omic2
@@ -223,6 +225,19 @@ def make_figure(ranks_pd: pd.DataFrame, o_ranks_explored: str,
     ranks_pd2merge = ranks_pd[[omic1, omic2, conditionals_1, conditionals_2]]
     ranks_st = get_stacked(ranks_pd, omic1_column, omic2_column, omic1, omic2)
     ranks_st = ranks_st.merge(ranks_pd2merge, on=[omic1, omic2], how='left')
+
+    text = ["\n\nCo-occurrence matrix exploration tool (mmvec)",
+            "%s (%s features) vs. %s (%s features)" % (
+                omic1, ranks_st[omic1].unique().size,
+                omic2, ranks_st[omic2].unique().size)
+            ]
+    subtext = []
+    if p_omic1_filt and p_omic1_value:
+        subtext.append("Subset %s for '%s' in '%s'" % (
+            omic1, ', '.join(list(p_omic1_value)), p_omic1_filt))
+    if p_omic2_filt and p_omic2_value:
+        subtext.append("Subset %s for '%s' in '%s'" % (
+            omic2, ', '.join(list(p_omic1_value)), p_omic2_filt))
 
     conditionals = ['conditionals', 'ranked_conditionals', conditionals_1, conditionals_2]
     conditionals_radio = alt.binding_radio(options=conditionals)
@@ -274,7 +289,7 @@ def make_figure(ranks_pd: pd.DataFrame, o_ranks_explored: str,
     ).add_selection(
         conditionals_select, mlt1, mlt2, selector1, selector2
     ).properties(
-        width=x_size, height=y_size
+        width=x_size, height=y_size,
     )
 
     bar_omic1 = get_bar_chart(ranks_st, sorted_omic1, conditionals_1, conditionals_2,
@@ -284,15 +299,22 @@ def make_figure(ranks_pd: pd.DataFrame, o_ranks_explored: str,
                               omic2_column, omic2, omic1, omic2, x_size, y_size,
                               mlt2, selector1, selector2)
     chart = alt.vconcat(
-        alt.hconcat(rect, bar_omic2), bar_omic1
+        alt.hconcat(rect, bar_omic2),
+        bar_omic1
     ).resolve_legend(
         color="independent", size="independent"
     ).configure_axis(
         labelLimit=300, labelFontSize=8,
     ).configure_legend(
         labelLimit=1000, labelFontSize=8, titleFontSize=8, symbolSize=12, columns=3
+    ).properties(
+        title={
+            "text": text,
+            "subtitle": (subtext + ["(based on altair)"]),
+            "color": "black",
+            "subtitleColor": "grey"
+        }
     )
-
     if not isdir(dirname(o_ranks_explored)):
         os.makedirs(dirname(o_ranks_explored))
     chart.save(o_ranks_explored)
@@ -355,4 +377,5 @@ def xmmvec(
     else:
         ranks_explored = '%s-p%s-n%s.html' % (splitext(i_ranks_path)[0], p_min_probability, p_pair_number)
     make_figure(ranks_pd, ranks_explored, p_pair_number, p_color_palette,
-                omic1_column_new, omic2_column_new, omic1, omic2)
+                omic1_column_new, omic2_column_new, omic1, omic2,
+                p_omic1_filt, p_omic1_value, p_omic2_filt, p_omic2_value)
