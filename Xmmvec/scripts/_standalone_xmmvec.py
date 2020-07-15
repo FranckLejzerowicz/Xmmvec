@@ -92,6 +92,9 @@ from Xmmvec import __version__
                        'spectral', 'rainbow', 'sinebow']),
     help="Color palette for the heatmap."
 )
+@click.option(
+    "--verbose/--no-verbose", default=False
+)
 @click.version_option(__version__, prog_name="Xmmvec")
 
 
@@ -111,7 +114,8 @@ def standalone_xmmvec(
         p_omic2_name,
         p_min_probability,
         p_pair_number,
-        p_color_palette
+        p_color_palette,
+        verbose
 ):
 
     xmmvec(
@@ -130,7 +134,8 @@ def standalone_xmmvec(
         p_omic2_name,
         p_min_probability,
         p_pair_number,
-        p_color_palette
+        p_color_palette,
+        verbose
     )
 
 

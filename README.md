@@ -49,6 +49,13 @@ but note that the features in:
   - the columns of the matrix will be associated with options `1` (`-m1`, `-c1`, `-n1`, `-f1`, `-v1`).
   - the rows of the matrix will be associated with options `2` (`-m2`, `-c2`, `-n2`, `-f2`, `-v2`).
 
+* Parameters:
+  - `-p, --p-min-probability` (optional): set a threshold to remove co-occurrences associated
+  with conditional probabilities below this threshold.
+  - `-n, --p-pair-number` (optional): a number of top co-occurrences to initialize the plot.  
+  - `-col, --p-color-palette` (optional): color map for the heatmap of conditional probabilities (or 
+  ranked conditional probabilities).
+ 
 ## Outputs
 
 A vizualization file in html containing three interactive panels:
@@ -81,26 +88,86 @@ of *omic2*, from the least to the most probably co-occurring features of *omic1*
 
 ## Example
 
+Say you have this co-occurrences conditional probabilities table:
+
+|  | omic1_feature0 | omic1_feature1 | omic1_feature2 | omic1_feature3 | ... | omic1_featuren |
+| :---:  | :---: | :---: | :---: | :---: | :---: | :---: |
+| omic2_feature0 | 1.636361 | 2.019793 | 0.779007 | 0.779007 | ... | 0.058756 |
+| omic2_feature1 | -0.190842 | -0.114221 | 0.072174 | 0.072174 | ... | 0.57362 |
+| omic2_feature2 | 0.984774 | 0.871110 | 0.717266 | 0.717266 | ... | 0.056844 |
+| omic2_feature3 | -0.190842 | -0.114221 | 0.072174 | 0.072174 | ... | 2.93982 |
+| ... | ... | ... | ... | ... | ... | ... |
+| omic2_featuren | 2.241402 | 2.253651 | 1.642426 | 1.642426 | ... | 0.096842 |
+
+First, note it is possible to tell Xmmvec to only show the co-occurrences associated with conditional
+probabilities of more than a given threshold (use `-p, --p-min-probability`). This may effectively remove
+entire row/columns and make the plot more easy to explore. For example, using `-p 1`, would basically 
+make Xmmvec to work with this subtable:     
+
+|  | omic1_feature0 | omic1_feature1 | omic1_feature2 | omic1_feature3 | ... | omic1_featuren |
+| :---:  | :---: | :---: | :---: | :---: | :---: | :---: |
+| omic2_feature0 | 1.636361 | 2.019793 | 0.779007 | 0.779007 | ... | 0.058756 |
+| omic2_feature3 | -0.190842 | -0.114221 | 0.072174 | 0.072174 | ... | 2.93982 |
+| ... | ... | ... | ... | ... | ... | ... |
+| omic2_featuren | 2.241402 | 2.253651 | 1.642426 | 1.642426 | ... | 0.096842 |
+
+We will use the simple example of this package:
+
+* [`ranks_test.tsv`] features of omic1 are labelled *omic1_feature#* and that of omic2, *omic2_feature#*. Here's the first 
+cellsof the matrix (note that omic1 features Are in columns and omic2's in rows).  
+
+    | | omic1_feature0 | omic1_feature1 | omic1_feature2 | ... | 
+    | :---: | :---: | :---: | :---: | :---: |
+    | omic2_feature0 | 1.6363606031615694 | 2.019792619120501 | 0.7790071014082969 | ... | 
+    | omic2_feature1 | 2.241402154115007 | 2.2536513233353035 | 1.642426395765597 | ... | 
+    | omic2_feature2 | 0.9847736657155712 | 0.8711101258991643 | 0.7172655705130637 | ... | 
+    | ... | ... | ... | ... | ... | 
+
+* [`omic1_metadata.tsv`] and are features metadata tables for omic1 and omic2, respectively,   
+
+    e.g for omic1:
+
+    | Feature ID | num_var | cat_var1 | cat_var2 |
+    | :---: | :---: | :---: | :---: |
+    | omic1_feature0 | -0.0775126805232021 | factor0 | factor0 |
+    | omic1_feature1 | 0.0265196049882916 | factor1 | factor1 |
+    | omic1_feature2 | -0.0764886449026989 | factor2 | factor2 |
+    | ... | ... | ... | ... |
+
+
+Running:
+
+    ```
+Xmmvec \
+    -r Xmmvec/tests/example/ranks_test.tsv \
+    -p 2 \
+    -m1 Xmmvec/tests/example/omic1_metadata.tsv \
+    -n1 omic1_renamed_like_this \
+    -c1 cat_var1 \
+    -f1 cat_var2 \
+    -v1 factor1 -v1 factor2 -v1 factor3 \
+    -m2 Xmmvec/tests/example/omic2_metadata.tsv \
+    -n2 omic1_renamed_like_that \
+    -c2 cat_var1 \
+    -f2 cat_var2 \
+    -v1 factor2 -v1 factor3 -v1 factor4 \
+    -col blues
+    ```
+Would return file `Xmmvec/tests/example/ranks_test-p2.0-n10.html` with 'omic1' and 'omic2' as 
+columns and rows in the interactive heatmap coloured per values.
+
 If no output file name is specified, the input filename is stripped from its extension,
 which is replaced by the values of options `-p, --p-min-probability` and `-n, --p-pair-number`,
 and the `.html` extension.
 
-- Running:
+## Visualization
 
-    ```
-    Xmmvec \
-        -r Xmmvec/tests/example/ranks.tsv \
-        -p 1 \
-        -n 100 \
-        -n1 omic1 \
-        -n2 omic2 \
-        -m1 meta_omic1.tsv \
-        -m1 meta_omic2.tsv \
-        -c1 Taxolevel_B \
-        -c2 Taxolevel_C \
-    ```
-    Would return file `Xmmvec/tests/example/ranks-p1-n100.html` with 'omic1' and 'omic2' as 
-    columns and rows in the interactive heatmap coloured per values.
+* Change scale of conditional probability values:
+    - *conditionals*: raw
+    - *ranked_conditionals*: ranked across matrix
+    - *conditionals_per_<omic1_name>*: ranked omic2 features per omic1 feature
+    - *conditionals_per_<omic2_name>*: ranked omic1 features per omic2 feature
+    ![](Xmmvec/gifs/conditional_selection.gif)
 
 
 ### Optional arguments
