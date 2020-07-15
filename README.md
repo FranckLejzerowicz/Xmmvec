@@ -123,7 +123,7 @@ cellsof the matrix (note that omic1 features Are in columns and omic2's in rows)
     | omic2_feature2 | 0.9847736657155712 | 0.8711101258991643 | 0.7172655705130637 | ... | 
     | ... | ... | ... | ... | ... | 
 
-* [`omic1_metadata.tsv`] and are features metadata tables for omic1 and omic2, respectively,   
+* [`omic1_metadata.tsv`] and [`omic2_metadata.tsv`] are features metadata tables for omic1 and omic2, respectively,   
 
     e.g for omic1:
 
