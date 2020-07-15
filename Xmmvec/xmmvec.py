@@ -340,18 +340,29 @@ def xmmvec(
     p_color_palette: str
 ):
     i_ranks_path = check_path(i_ranks_path)
-
+    print('Input matrix:', i_ranks_path)
     omic1 = get_name(p_omic1_name, 'omic1')
     omic2 = get_name(p_omic2_name, 'omic2')
+    print('Dealing with:')
+    print(' - omic1 (matrix columns): ', omic1)
+    print(' - omic2 (matrix rows):    ', omic2)
 
     if i_tree_taxonomy:
         i_tree_taxonomy = check_path(i_tree_taxonomy)
 
-    omic1_metadata, omic1_column = get_metadata(p_omic1_metadata, p_omic1_column, omic1)
-    omic2_metadata, omic2_column = get_metadata(p_omic2_metadata, p_omic2_column, omic2)
+    if p_omic1_metadata or p_omic2_metadata:
+        print('Read metadata...', end='')
+        omic1_metadata, omic1_column = get_metadata(p_omic1_metadata, p_omic1_column, omic1)
+        omic2_metadata, omic2_column = get_metadata(p_omic2_metadata, p_omic2_column, omic2)
+        print('done.')
 
-    omic1_metadata = get_filter(omic1_metadata, p_omic1_filt, p_omic1_value)
-    omic2_metadata = get_filter(omic2_metadata, p_omic2_filt, p_omic2_value)
+    if p_omic1_filt or p_omic1_filt:
+        print('Filter metadata...', end='')
+        omic1_metadata = get_filter(omic1_metadata, p_omic1_filt, p_omic1_value)
+        omic2_metadata = get_filter(omic2_metadata, p_omic2_filt, p_omic2_value)
+        print('done.')
+
+    print('Cast ranks as column formatted...', end='')
     ranks_pd = pd.read_csv(i_ranks_path, header=0, index_col=0, sep='\t')
     ranks_pd = ranks_pd.loc[
         list(set(omic2_metadata[omic2]) & set(ranks_pd.index)),
@@ -361,13 +372,16 @@ def xmmvec(
     ranks_pd = ranks_pd.loc[(~ranks_pd.isna().all(1)), (~ranks_pd.isna().all())]
     ranks_pd = ranks_pd.unstack().reset_index().rename(
         columns={'level_0': omic1, 'featureid': omic2, 0: 'conditionals'})
-
-    ranks_pd, omic1_column_new = merge_metadata(ranks_pd, omic1_metadata, omic1_column, omic1)
-    ranks_pd, omic2_column_new = merge_metadata(ranks_pd, omic2_metadata, omic2_column, omic2)
-
     ranks_pd['ranked_conditionals'] = ranks_pd.conditionals.rank()
     ranks_pd = add_ranks(ranks_pd, omic1)
     ranks_pd = add_ranks(ranks_pd, omic2)
+    print('done.')
+
+    if omic1_metadata.shape[0] or omic2_metadata.shape[0]:
+        print('Merge metadata...', end='')
+        ranks_pd, omic1_column_new = merge_metadata(ranks_pd, omic1_metadata, omic1_column, omic1)
+        ranks_pd, omic2_column_new = merge_metadata(ranks_pd, omic2_metadata, omic2_column, omic2)
+        print('done.')
 
     if o_ranks_explored:
         if o_ranks_explored.endswith('.html'):
@@ -376,6 +390,9 @@ def xmmvec(
             raise IOError('Output file name must end with ".html')
     else:
         ranks_explored = '%s-p%s-n%s.html' % (splitext(i_ranks_path)[0], p_min_probability, p_pair_number)
+
+    print('Make figure:')
     make_figure(ranks_pd, ranks_explored, p_pair_number, p_color_palette,
                 omic1_column_new, omic2_column_new, omic1, omic2,
                 p_omic1_filt, p_omic1_value, p_omic2_filt, p_omic2_value)
+    print('Completed.')
