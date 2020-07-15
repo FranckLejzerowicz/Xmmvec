@@ -138,20 +138,20 @@ cellsof the matrix (note that omic1 features Are in columns and omic2's in rows)
 Running:
 
     ```
-Xmmvec \
-    -r Xmmvec/tests/example/ranks_test.tsv \
-    -p 2 \
-    -m1 Xmmvec/tests/example/omic1_metadata.tsv \
-    -n1 omic1_renamed_like_this \
-    -c1 cat_var1 \
-    -f1 cat_var2 \
-    -v1 factor1 -v1 factor2 -v1 factor3 \
-    -m2 Xmmvec/tests/example/omic2_metadata.tsv \
-    -n2 omic1_renamed_like_that \
-    -c2 cat_var1 \
-    -f2 cat_var2 \
-    -v1 factor2 -v1 factor3 -v1 factor4 \
-    -col blues
+    Xmmvec \
+        -r Xmmvec/tests/example/ranks_test.tsv \
+        -p 2 \
+        -m1 Xmmvec/tests/example/omic1_metadata.tsv \
+        -n1 omic1_renamed_like_this \
+        -c1 cat_var1 \
+        -f1 cat_var2 \
+        -v1 factor1 -v1 factor2 -v1 factor3 \
+        -m2 Xmmvec/tests/example/omic2_metadata.tsv \
+        -n2 omic2_renamed_like_that \
+        -c2 cat_var1 \
+        -f2 cat_var2 \
+        -v1 factor2 -v1 factor3 -v1 factor4 \
+        -col blues
     ```
 Would return file `Xmmvec/tests/example/ranks_test-p2.0-n10.html` with 'omic1' and 'omic2' as 
 columns and rows in the interactive heatmap coloured per values.
@@ -167,8 +167,17 @@ and the `.html` extension.
     - *ranked_conditionals*: ranked across matrix
     - *conditionals_per_<omic1_name>*: ranked omic2 features per omic1 feature
     - *conditionals_per_<omic2_name>*: ranked omic1 features per omic2 feature
+    
     ![](Xmmvec/gifs/conditional_selection.gif)
 
+* Change number of top-ranked omic1 (or omic2) features for each feature of or omic2 (or omic1).
+    Two sliders:
+    - *max. rank of <omic1_name> per each <omic2_name>*: it makes more sense to view the ranks on the heatmap as
+    *conditionals_per_<omic2_name>*
+    - *max. rank of <omic2_name> per each <omic1_name>*: it makes more sense to view the ranks on the heatmap as
+    *conditionals_per_<omic1_name>*
+    
+    ![](Xmmvec/gifs/change_slider1.gif)
 
 ### Optional arguments
 
