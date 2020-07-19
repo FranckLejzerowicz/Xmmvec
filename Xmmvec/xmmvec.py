@@ -216,10 +216,18 @@ def make_figure(ranks_pd: pd.DataFrame, o_ranks_explored: str,
                 p_pair_number: int, p_color_palette: str, omic1_column: str,
                 omic2_column: str, omic1: str, omic2: str,
                 p_omic1_filt: str, p_omic1_value: str,
-                p_omic2_filt: str, p_omic2_value: str) -> None:
+                p_omic2_filt: str, p_omic2_value: str,
+                p_omic1_max: int, p_omic2_max: int) -> None:
 
     conditionals_1 = 'conditionals_per_%s' % omic1
     conditionals_2 = 'conditionals_per_%s' % omic2
+
+    display(ranks_pd.iloc[:5,:5])
+
+    if p_omic1_max:
+        ranks_pd = ranks_pd.loc[ranks_pd[conditionals_1] <= p_omic1_max, :]
+    if p_omic2_max:
+        ranks_pd = ranks_pd.loc[ranks_pd[conditionals_2] <= p_omic2_max, :]
 
     ranks_pd2merge = ranks_pd[[omic1, omic2, conditionals_1, conditionals_2]]
     ranks_st = get_stacked(ranks_pd, omic1_column, omic2_column, omic1, omic2)
@@ -356,6 +364,8 @@ def xmmvec(
     p_min_probability: float,
     p_pair_number: int,
     p_color_palette: str,
+    p_omic1_max: int,
+    p_omic2_max: int,
     verbose: bool
 
 ):
@@ -429,6 +439,7 @@ def xmmvec(
         print('Make figure:')
     make_figure(ranks_pd, ranks_explored, p_pair_number, p_color_palette,
                 omic1_column_new, omic2_column_new, omic1, omic2,
-                p_omic1_filt, p_omic1_value, p_omic2_filt, p_omic2_value)
+                p_omic1_filt, p_omic1_value, p_omic2_filt, p_omic2_value,
+                p_omic1_max, p_omic2_max)
     if verbose:
         print('Completed.')

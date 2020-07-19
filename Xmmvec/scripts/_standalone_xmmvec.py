@@ -82,6 +82,14 @@ from Xmmvec import __version__
     help="initial number of co-occurrences per feature."
 )
 @click.option(
+    "-x1", "--p-omic1-max", default=50, show_default=True, type=int,
+    help="Maximum number of co-occurrences per omic1 feature."
+)
+@click.option(
+    "-x2", "--p-omic2-max", default=50, show_default=True, type=int,
+    help="Maximum number of co-occurrences per omic2 feature."
+)
+@click.option(
     "-col", "--p-color-palette", default='rainbow', show_default=True,
     type=click.Choice(['blues', 'greens', 'oranges', 'reds', 'purples', 'greys', 'viridis',
                        'magma', 'inferno', 'plasma', 'bluegreen', 'bluepurple', 'greenblue',
@@ -115,6 +123,8 @@ def standalone_xmmvec(
         p_min_probability,
         p_pair_number,
         p_color_palette,
+        p_omic1_max,
+        p_omic2_max,
         verbose
 ):
 
@@ -135,6 +145,8 @@ def standalone_xmmvec(
         p_min_probability,
         p_pair_number,
         p_color_palette,
+        p_omic1_max,
+        p_omic2_max,
         verbose
     )
 
