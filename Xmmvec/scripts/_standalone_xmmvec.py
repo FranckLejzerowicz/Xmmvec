@@ -50,6 +50,10 @@ from Xmmvec import __version__
     show_default=True, help="Name for omic1 features."
 )
 @click.option(
+    "-l1", "--p-omic1-list", required=False, default="",
+    help="List of omic1 features to subset (regex accepted)."
+)
+@click.option(
     "-m2", "--p-omic2-metadata", required=False, default="",
     help="{Path to the metadata table for omic2 features "
          "(rows of the ranks matrix)."
@@ -72,6 +76,10 @@ from Xmmvec import __version__
 @click.option(
     "-n2", "--p-omic2-name", required=False, default="omic2",
     show_default=True, help="Name for omic2 features."
+)
+@click.option(
+    "-l2", "--p-omic2-list", required=False, default="",
+    help="List of omic2 features to subset (regex accepted)."
 )
 @click.option(
     "-p", "--p-min-probability", default=0., show_default=True, type=float,
@@ -115,11 +123,13 @@ def standalone_xmmvec(
         p_omic1_filt,
         p_omic1_value,
         p_omic1_name,
+        p_omic1_list,
         p_omic2_metadata,
         p_omic2_column,
         p_omic2_filt,
         p_omic2_value,
         p_omic2_name,
+        p_omic2_list,
         p_min_probability,
         p_pair_number,
         p_color_palette,
@@ -137,11 +147,13 @@ def standalone_xmmvec(
         p_omic1_filt,
         p_omic1_value,
         p_omic1_name,
+        p_omic1_list,
         p_omic2_metadata,
         p_omic2_column,
         p_omic2_filt,
         p_omic2_value,
         p_omic2_name,
+        p_omic2_list,
         p_min_probability,
         p_pair_number,
         p_color_palette,

@@ -27,6 +27,23 @@ def get_name(p_omic_name: str, omic: str) -> str:
         return omic
 
 
+def get_subset(ranks_pd: pd.DataFrame, subset_regex_fp: str, axis: int) -> pd.DataFrame:
+    subset_regex = [x.strip() for x in open(subset_regex_fp).readlines()]
+    to_keep_feats = {}
+    for regex in subset_regex:
+        if axis:
+            to_keep_feats[regex.lower()] = ranks_pd.index.str.lower().str.contains(regex.lower())
+        else:
+            to_keep_feats[regex.lower()] = ranks_pd.columns.str.lower().str.contains(regex.lower())
+    to_keep_feats_pd = pd.DataFrame(to_keep_feats)
+    to_keep_feats = to_keep_feats_pd.any(axis=1)
+    if axis:
+        ranks_pd = ranks_pd.loc[ranks_pd.index[to_keep_feats].tolist(), :]
+    else:
+        ranks_pd = ranks_pd.loc[:, ranks_pd.columns[to_keep_feats].tolist(), :]
+    return ranks_pd
+
+
 def get_metadata(omic_metadata_fp: str, p_omic_column: str, omic: str) -> (pd.DataFrame, str):
     omic_metadata = pd.DataFrame()
     omic_column = ''
@@ -356,11 +373,13 @@ def xmmvec(
     p_omic1_filt: str,
     p_omic1_value: str,
     p_omic1_name: str,
+    p_omic1_list: str,
     p_omic2_metadata: str,
     p_omic2_column: str,
     p_omic2_filt: str,
     p_omic2_value: str,
     p_omic2_name: str,
+    p_omic2_list: str,
     p_min_probability: float,
     p_pair_number: int,
     p_color_palette: str,
@@ -383,8 +402,15 @@ def xmmvec(
     if i_tree_taxonomy:
         i_tree_taxonomy = check_path(i_tree_taxonomy)
 
+    if p_omic1_list:
+        ranks_pd = get_subset(ranks_pd, p_omic1_list, 0)
+    if p_omic2_list:
+        ranks_pd = get_subset(ranks_pd, p_omic2_list, 1)
+
     omic1_metadata = pd.DataFrame()
     omic2_metadata = pd.DataFrame()
+    omic1_column = ''
+    omic2_column = ''
     if p_omic1_metadata or p_omic2_metadata:
         if verbose:
             print('Read metadata...', end='')
