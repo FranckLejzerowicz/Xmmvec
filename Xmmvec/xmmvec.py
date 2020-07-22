@@ -78,8 +78,9 @@ def get_sign_val(p_omic_value: str) -> list:
     return signs_vals
 
 
-def get_filter(omic_metadata: pd.DataFrame, p_omic_filt: str, p_omic_value: str):
-    if p_omic_filt and p_omic_value:
+def get_filter(omic_metadata: pd.DataFrame, p_omic_filt: str, p_omic_value: str, p_omic_quant: float):
+
+    if p_omic_filt:
         if p_omic_filt in omic_metadata.columns:
             pass
         elif p_omic_filt.replace('\\n', '') in omic_metadata.columns:
@@ -87,14 +88,23 @@ def get_filter(omic_metadata: pd.DataFrame, p_omic_filt: str, p_omic_value: str)
         else:
             return omic_metadata
         omic_metadata_col = omic_metadata[p_omic_filt].copy()
-        if len([1 for x in p_omic_value if x[0] in ['<', '>']]):
-            signs_vals = get_sign_val(p_omic_value)
-            filt = get_col_bool_sign(omic_metadata_col, signs_vals)
-        else:
-            if not len([x for x in p_omic_value if x in omic_metadata_col.values]):
-                raise IndexError('None of "%s" in column "%s"' % (', '.join(list(p_omic_value)), p_omic_filt))
-            filt = omic_metadata_col.isin([x for x in p_omic_value])
-        return omic_metadata[filt]
+        if p_omic_quant:
+            if p_omic_quant < 0 or p_omic_quant > 100:
+                raise IOError('Quantile must be between 0 and 100, not', p_omic_quant)
+            if str(omic_metadata_col.dtype) == 'float64':
+                q = omic_metadata_col.quantile(q=p_omic_quant/100)
+                omic_metadata_col = omic_metadata_col[omic_metadata_col > q]
+                omic_metadata = omic_metadata.loc[omic_metadata_col.index, :]
+        if p_omic_value:
+            if len([1 for x in p_omic_value if x[0] in ['<', '>']]):
+                signs_vals = get_sign_val(p_omic_value)
+                filt = get_col_bool_sign(omic_metadata_col, signs_vals)
+            else:
+                if not len([x for x in p_omic_value if x in omic_metadata_col.values]):
+                    raise IndexError('None of "%s" in column "%s"' % (', '.join(list(p_omic_value)), p_omic_filt))
+                filt = omic_metadata_col.isin([x for x in p_omic_value])
+            omic_metadata = omic_metadata[filt]
+        return omic_metadata
     else:
         return omic_metadata
 
@@ -239,8 +249,6 @@ def make_figure(ranks_pd: pd.DataFrame, o_ranks_explored: str,
     conditionals_1 = 'conditionals_per_%s' % omic1
     conditionals_2 = 'conditionals_per_%s' % omic2
 
-    display(ranks_pd.iloc[:5,:5])
-
     if p_omic1_max:
         ranks_pd = ranks_pd.loc[ranks_pd[conditionals_1] <= p_omic1_max, :]
     if p_omic2_max:
@@ -364,6 +372,14 @@ def make_figure(ranks_pd: pd.DataFrame, o_ranks_explored: str,
     print('-> Written:', o_ranks_explored)
 
 
+def filt_ranks(ranks_pd, omic1_metadata, omic1, omic2_metadata, omic2):
+    if omic1_metadata.shape[0]:
+        ranks_pd = ranks_pd.loc[:,list(set(omic1_metadata[omic1]) & set(ranks_pd.columns))]
+    if omic2_metadata.shape[0]:
+        ranks_pd = ranks_pd.loc[list(set(omic2_metadata[omic2]) & set(ranks_pd.index)),:]
+    return ranks_pd
+
+
 def xmmvec(
     i_ranks_path: str,
     o_ranks_explored: str,
@@ -372,19 +388,21 @@ def xmmvec(
     p_omic1_column: str,
     p_omic1_filt: str,
     p_omic1_value: str,
+    p_omic1_quant: float,
     p_omic1_name: str,
     p_omic1_list: str,
+    p_omic1_max: int,
     p_omic2_metadata: str,
     p_omic2_column: str,
     p_omic2_filt: str,
     p_omic2_value: str,
+    p_omic2_quant: float,
     p_omic2_name: str,
     p_omic2_list: str,
+    p_omic2_max: int,
     p_min_probability: float,
     p_pair_number: int,
     p_color_palette: str,
-    p_omic1_max: int,
-    p_omic2_max: int,
     verbose: bool
 
 ):
@@ -422,12 +440,9 @@ def xmmvec(
     if p_omic1_filt or p_omic1_filt:
         if verbose:
             print('Filter using metadata...', end='')
-        omic1_metadata = get_filter(omic1_metadata, p_omic1_filt, p_omic1_value)
-        omic2_metadata = get_filter(omic2_metadata, p_omic2_filt, p_omic2_value)
-        ranks_pd = ranks_pd.loc[
-            list(set(omic2_metadata[omic2]) & set(ranks_pd.index)),
-            list(set(omic1_metadata[omic1]) & set(ranks_pd.columns))
-        ]
+        omic1_metadata = get_filter(omic1_metadata, p_omic1_filt, p_omic1_value, p_omic1_quant)
+        omic2_metadata = get_filter(omic2_metadata, p_omic2_filt, p_omic2_value, p_omic2_quant)
+        ranks_pd = filt_ranks(ranks_pd, omic1_metadata, omic1, omic2_metadata, omic2)
         if verbose:
             print('done.')
 

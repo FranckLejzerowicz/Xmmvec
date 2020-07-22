@@ -20,7 +20,7 @@ pip install --upgrade git+https://github.com/FranckLejzerowicz/Xmmvec.git
 *_Note that python and pip should be python3_
 
 ## Input
-
+    
 * Data files:
   - `-r, --i-ranks-path`: mmvec output matrix of conditional probabilities between the omic1 
 features and omic2 features
@@ -41,8 +41,17 @@ features and omic2 features
   - `-f1, --p-omic1-filt` and `-f2, --p-omic2-filt` (optional): column of the 'omic1' (and/or 'omic2') 
   features metadata table passed to `-m1, --p-omic1-metadata` (and/or `-m2, --p-omic2-metadata`) that  
   is used for features filtering.  
-  - `-v1, --p-omic1-value` and `-v2, --p-omic2-value` (optional): factor(s) (or threshold(s)) for columns
+  - `-v1, --p-omic1-value` and `-v2, --p-omic2-value` (optional): factor(s) (or absolute threshold(s)) for columns
   `-f1, --p-omic1-filt` (and/or `-f2, --p-omic2-filt`) used to filter the features.
+  - `-q1, --p-omic1-quant` and `-q2, --p-omic2-quant` (optional): Quantile (or relative threshold(s)) for columns
+  `-f1, --p-omic1-filt` (and/or `-f2, --p-omic2-filt`) used to filter the features. If the column is numerical, 
+  specify a quantile moment to subset for features having values >= to the quantile value, for example to only see
+  the co-occurrences with the features that are the most associated with a songbird differentials column!
+  - `-l1`, `--p-omic1-list` and `-l2`, `--p-omic2-list` (optional): lists of features (or regex to match 
+  features) to subset for.
+  - `-x1, --p-omic1-max` and `-x2, --p-omic2-max` (optional): maximum number of top co-occurrences to 
+  show per feature (not very useful sine in the end there's a good chance that the unique omic1 and omic2
+  features sets are still very large).
 
 The names of the paired omics can be invented (using `-n1` and `-n2`), 
 but note that the features in:
@@ -194,12 +203,22 @@ and the `.html` extension.
                                   stratification of omic1 features.
 
   -f1, --p-omic1-filt TEXT        Column from metadata `-m1` to use for
-                                  filtering based on values of `-f1`.
+                                  filtering based on values of `-v1`.
 
-  -v1, --p-omic1-value TEXT       Filter omic1 features based on column passed
-                                  to `-f1`.
+  -v1, --p-omic1-value TEXT       Filtering value for omic1 features based on
+                                  column passed to `-f1`.
+
+  -q1, --p-omic1-quant INTEGER    Filtering percentile for omic1 features
+                                  based on column passed to `-f1` (must be
+                                  between 0 and 100).
 
   -n1, --p-omic1-name TEXT        Name for omic1 features.  [default: omic1]
+  -l1, --p-omic1-list TEXT        List of omic1 features to subset (regex
+                                  accepted).
+
+  -x1, --p-omic1-max INTEGER      Maximum number of co-occurrences per omic1
+                                  feature.  [default: 50]
+
   -m2, --p-omic2-metadata TEXT    {Path to the metadata table for omic2
                                   features (rows of the ranks matrix).
 
@@ -207,12 +226,22 @@ and the `.html` extension.
                                   stratification of omic2 features.
 
   -f2, --p-omic2-filt TEXT        Column from metadata `-m2` to use for
-                                  filtering based on values of `-f2`.
+                                  filtering based on values of `-v2`.
 
-  -v2, --p-omic2-value TEXT       Filter omic2 features based on column passed
-                                  to `-f2`.
+  -v2, --p-omic2-value TEXT       Filtering value for omic2 features based on
+                                  column passed to `-f2`.
+
+  -q2, --p-omic2-quant INTEGER    Filtering quantile / percentile for omic2
+                                  features based on column passed to `-f2`
+                                  (must be between 0 and 100).
 
   -n2, --p-omic2-name TEXT        Name for omic2 features.  [default: omic2]
+  -l2, --p-omic2-list TEXT        List of omic2 features to subset (regex
+                                  accepted).
+
+  -x2, --p-omic2-max INTEGER      Maximum number of co-occurrences per omic2
+                                  feature.  [default: 50]
+
   -p, --p-min-probability FLOAT   Minimum conditional probability.  [default:
                                   0.0]
 
@@ -223,11 +252,10 @@ and the `.html` extension.
                                   Color palette for the heatmap.  [default:
                                   rainbow]
 
+  --verbose / --no-verbose
   --version                       Show the version and exit.
   --help                          Show this message and exit.
 ```
-
-
 
 ### Bug Reports
 

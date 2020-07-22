@@ -38,12 +38,17 @@ from Xmmvec import __version__
 @click.option(
     "-f1", "--p-omic1-filt", required=False, default="",
     help="Column from metadata `-m1` to use for "
-         " filtering based on values of `-f1`."
+         " filtering based on values of `-v1`."
 )
 @click.option(
     "-v1", "--p-omic1-value", required=False, default="", multiple=True,
-    help="Filter omic1 features based on"
+    help="Filtering value for omic1 features based on"
          " column passed to `-f1`."
+)
+@click.option(
+    "-q1", "--p-omic1-quant", required=False, default=0, type=int,
+    help="Filtering percentile for omic1 features based on"
+         " column passed to `-f1` (must be between 0 and 100)."
 )
 @click.option(
     "-n1", "--p-omic1-name", required=False, default="omic1",
@@ -52,6 +57,10 @@ from Xmmvec import __version__
 @click.option(
     "-l1", "--p-omic1-list", required=False, default="",
     help="List of omic1 features to subset (regex accepted)."
+)
+@click.option(
+    "-x1", "--p-omic1-max", default=50, show_default=True, type=int,
+    help="Maximum number of co-occurrences per omic1 feature."
 )
 @click.option(
     "-m2", "--p-omic2-metadata", required=False, default="",
@@ -66,12 +75,17 @@ from Xmmvec import __version__
 @click.option(
     "-f2", "--p-omic2-filt", required=False, default="",
     help="Column from metadata `-m2` to use for "
-         " filtering based on values of `-f2`."
+         " filtering based on values of `-v2`."
 )
 @click.option(
     "-v2", "--p-omic2-value", required=False, default="", multiple=True,
-    help="Filter omic2 features based on"
+    help="Filtering value for omic2 features based on"
          " column passed to `-f2`."
+)
+@click.option(
+    "-q2", "--p-omic2-quant", required=False, default=0, type=int,
+    help="Filtering quantile / percentile for omic2 features based on"
+         " column passed to `-f2` (must be between 0 and 100)."
 )
 @click.option(
     "-n2", "--p-omic2-name", required=False, default="omic2",
@@ -82,20 +96,16 @@ from Xmmvec import __version__
     help="List of omic2 features to subset (regex accepted)."
 )
 @click.option(
+    "-x2", "--p-omic2-max", default=50, show_default=True, type=int,
+    help="Maximum number of co-occurrences per omic2 feature."
+)
+@click.option(
     "-p", "--p-min-probability", default=0., show_default=True, type=float,
     help="Minimum conditional probability."
 )
 @click.option(
     "-n", "--p-pair-number", default=10, show_default=True, type=int,
     help="initial number of co-occurrences per feature."
-)
-@click.option(
-    "-x1", "--p-omic1-max", default=50, show_default=True, type=int,
-    help="Maximum number of co-occurrences per omic1 feature."
-)
-@click.option(
-    "-x2", "--p-omic2-max", default=50, show_default=True, type=int,
-    help="Maximum number of co-occurrences per omic2 feature."
 )
 @click.option(
     "-col", "--p-color-palette", default='rainbow', show_default=True,
@@ -122,19 +132,21 @@ def standalone_xmmvec(
         p_omic1_column,
         p_omic1_filt,
         p_omic1_value,
+        p_omic1_quant,
         p_omic1_name,
         p_omic1_list,
+        p_omic1_max,
         p_omic2_metadata,
         p_omic2_column,
         p_omic2_filt,
         p_omic2_value,
+        p_omic2_quant,
         p_omic2_name,
         p_omic2_list,
+        p_omic2_max,
         p_min_probability,
         p_pair_number,
         p_color_palette,
-        p_omic1_max,
-        p_omic2_max,
         verbose
 ):
 
@@ -146,19 +158,21 @@ def standalone_xmmvec(
         p_omic1_column,
         p_omic1_filt,
         p_omic1_value,
+        p_omic1_quant,
         p_omic1_name,
         p_omic1_list,
+        p_omic1_max,
         p_omic2_metadata,
         p_omic2_column,
         p_omic2_filt,
         p_omic2_value,
+        p_omic2_quant,
         p_omic2_name,
         p_omic2_list,
+        p_omic2_max,
         p_min_probability,
         p_pair_number,
         p_color_palette,
-        p_omic1_max,
-        p_omic2_max,
         verbose
     )
 
