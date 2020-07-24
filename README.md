@@ -261,6 +261,10 @@ is in fact *the* top most associated with all rhamnolipids.
   -v1, --p-omic1-value TEXT       Filtering value for omic1 features based on
                                   column passed to `-f1`.
 
+  -r1, --p-omic1-value-regex TEXT
+                                  Path to a list of omic1 regex to subset from
+                                  column passed to `-f1` (regex accepted).
+
   -q1, --p-omic1-quant INTEGER    Filtering percentile for omic1 features
                                   based on column passed to `-f1` (must be
                                   between 0 and 100).
@@ -270,7 +274,7 @@ is in fact *the* top most associated with all rhamnolipids.
                                   accepted).
 
   -x1, --p-omic1-max INTEGER      Maximum number of co-occurrences per omic1
-                                  feature.  [default: 50]
+                                  feature.  [default: 0]
 
   -m2, --p-omic2-metadata TEXT    {Path to the metadata table for omic2
                                   features (rows of the ranks matrix).
@@ -284,6 +288,10 @@ is in fact *the* top most associated with all rhamnolipids.
   -v2, --p-omic2-value TEXT       Filtering value for omic2 features based on
                                   column passed to `-f2`.
 
+  -r2, --p-omic2-value-regex TEXT
+                                  Path to a list of omic2 regex to subset from
+                                  column passed to `-f1` (regex accepted).
+
   -q2, --p-omic2-quant INTEGER    Filtering quantile / percentile for omic2
                                   features based on column passed to `-f2`
                                   (must be between 0 and 100).
@@ -293,7 +301,7 @@ is in fact *the* top most associated with all rhamnolipids.
                                   accepted).
 
   -x2, --p-omic2-max INTEGER      Maximum number of co-occurrences per omic2
-                                  feature.  [default: 50]
+                                  feature.  [default: 0]
 
   -p, --p-min-probability FLOAT   Minimum conditional probability.  [default:
                                   0.0]
@@ -303,7 +311,10 @@ is in fact *the* top most associated with all rhamnolipids.
 
   -col, --p-color-palette [blues|greens|oranges|reds|purples|greys|viridis|magma|inferno|plasma|bluegreen|bluepurple|greenblue|orangered|purplebluegreen|purpleblue|purplered|redpurple|yellowgreenblue|yellowgreen|yelloworangebrown|yelloworangered|blueorange|brownbluegreen|purplegreen|pinkyellowgreen|purpleorange|redblue|redgrey|redyellowblue|redyellowgreen|spectral|rainbow|sinebow]
                                   Color palette for the heatmap.  [default:
-                                  rainbow]
+                                  blues]
+
+  -top, --p-color-top TEXT        Color for the top co-occurrences labels.
+                                  [default: white]
 
   --verbose / --no-verbose
   --version                       Show the version and exit.
