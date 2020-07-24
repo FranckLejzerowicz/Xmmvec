@@ -232,11 +232,7 @@ Running the following command on the `ranks.tsv` table from this paper and using
     ```
 
 One obtains this result, with showing the co-occurrences colored in terms of rank per metabolite, and the 10 top 
-co-occurrent metabolites per microbe.  
-
-![](Xmmvec/gifs/pc12.png)
- 
-Clearly, _P. aeruginosa_ is the most associated microbe for all rhamnolipids, and one _P. aeruginosa_ feature 
+co-occurrent metabolites per microbe. Clearly, _P. aeruginosa_ is the most associated microbe for all rhamnolipids, and one _P. aeruginosa_ feature 
 is in fact *the* top most associated with all rhamnolipids.
 
 ![](Xmmvec/gifs/top_most_associated.png)
