@@ -95,7 +95,7 @@ of *omic1*, from the least to the most probably co-occurring features of *omic2*
 of *omic2*, from the least to the most probably co-occurring features of *omic1*.     
 
 
-## Example
+## Usage
 
 Say you have this co-occurrences conditional probabilities table:
 
@@ -151,16 +151,15 @@ Running:
         -r Xmmvec/tests/example/ranks_test.tsv \
         -p 2 \
         -m1 Xmmvec/tests/example/omic1_metadata.tsv \
-        -n1 omic1_renamed_like_this \
+        -n1 omic1 \
         -c1 cat_var1 \
         -f1 cat_var2 \
         -v1 factor1 -v1 factor2 -v1 factor3 \
         -m2 Xmmvec/tests/example/omic2_metadata.tsv \
-        -n2 omic2_renamed_like_that \
+        -n2 omic2 \
         -c2 cat_var1 \
         -f2 cat_var2 \
         -v1 factor2 -v1 factor3 -v1 factor4 \
-        -col blues
     ```
 Would return file `Xmmvec/tests/example/ranks_test-p2.0-n10.html` with 'omic1' and 'omic2' as 
 columns and rows in the interactive heatmap coloured per values.
@@ -177,16 +176,70 @@ and the `.html` extension.
     - *conditionals_per_<omic1_name>*: ranked omic2 features per omic1 feature
     - *conditionals_per_<omic2_name>*: ranked omic1 features per omic2 feature
     
-    ![](Xmmvec/gifs/conditional_selection.gif)
+    ![](Xmmvec/gifs/conditionals.gif)
 
-* Change number of top-ranked omic1 (or omic2) features for each feature of or omic2 (or omic1).
+* Select features by clicking on the marginal bars (hold shift for multiple selection and double-click to reset) 
+    
+    ![](Xmmvec/gifs/selection.gif)
+
+* Label the top most associated omic1 (or omic2) features for each feature of omic2 (or omic1).
+    Two sliders:
+    - *top <omic1_name> per <omic2_name>*
+    - *top <omic2_name> per <omic1_name>*
+    _*ATTENTION*: To see all the top co-occurrences for one slide, set the other slider to maximum (as they both apply to 
+    filter the data)_
+    
+    ![](Xmmvec/gifs/slider1.gif)
+
+* Change total number of top-ranked omic1 (or omic2) features for each feature of omic2 (or omic1).
     Two sliders:
     - *max. rank of <omic1_name> per each <omic2_name>*: it makes more sense to view the ranks on the heatmap as
     *conditionals_per_<omic2_name>*
     - *max. rank of <omic2_name> per each <omic1_name>*: it makes more sense to view the ranks on the heatmap as
     *conditionals_per_<omic1_name>*
     
-    ![](Xmmvec/gifs/change_slider1.gif)
+    ![](Xmmvec/gifs/slider2.gif)
+
+## Example
+
+The CF dataset from [Morton et al. 2019](https://www.nature.com/articles/s41592-019-0616-3) can be used as a reference.
+One can provide lists of terms to search in each of the omic1 or omic2 features metadata in order to subset the matrix
+of co-occurrences for these features.
+
+In this paper was found that _Pseudomonas aeruginosa_ co-occurs with rhamnolipids:
+
+![](Xmmvec/gifs/pc12.png)
+ 
+For more insights about where these terms where picked from, please see 
+[this notebook](https://github.com/knightlab-analyses/multiomic-cooccurrences/blob/master/ipynb/Figure4-cystic-fibrosis.ipynb) 
+associated with this paper.
+
+Running the following command on the `ranks.tsv` table from this paper and using the associated feature metadata
+ 
+    ```
+    Xmmvec \
+        -r Xmmvec/tests/cf/ranks.tsv \ 
+        -m1 Xmmvec/tests/cf/point-metadata.txt \ 
+        -n1 metabolites \
+        -c1 shorthand \
+        -f1 shorthand \
+        -r1 Xmmvec/tests/cf/point_regex_shorthand.txt \
+        -n2 microbes \
+        -m2 Xmmvec/tests/cf/arrow-metadata.txt \ 
+        -c2 genus \
+        -f2 genus \
+        -r2 Xmmvec/tests/cf/arrow_regex_genus.txt
+    ```
+
+One obtains this result, with showing the co-occurrences colored in terms of rank per metabolite, and the 10 top 
+co-occurrent metabolites per microbe.  
+
+![](Xmmvec/gifs/pc12.png)
+ 
+Clearly, _P. aeruginosa_ is the most associated microbe for all rhamnolipids, and one _P. aeruginosa_ feature 
+is in fact *the* top most associated with all rhamnolipids.
+
+![](Xmmvec/gifs/top_most_associated.png)
 
 ### Optional arguments
 

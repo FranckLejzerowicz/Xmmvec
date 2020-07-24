@@ -46,6 +46,11 @@ from Xmmvec import __version__
          " column passed to `-f1`."
 )
 @click.option(
+    "-r1", "--p-omic1-value-regex", required=False, default="",
+    help="Path to a list of omic1 regex to subset from "
+         "column passed to `-f1` (regex accepted)."
+)
+@click.option(
     "-q1", "--p-omic1-quant", required=False, default=0, type=int,
     help="Filtering percentile for omic1 features based on"
          " column passed to `-f1` (must be between 0 and 100)."
@@ -59,7 +64,7 @@ from Xmmvec import __version__
     help="List of omic1 features to subset (regex accepted)."
 )
 @click.option(
-    "-x1", "--p-omic1-max", default=50, show_default=True, type=int,
+    "-x1", "--p-omic1-max", default=0, show_default=True, type=int,
     help="Maximum number of co-occurrences per omic1 feature."
 )
 @click.option(
@@ -83,6 +88,11 @@ from Xmmvec import __version__
          " column passed to `-f2`."
 )
 @click.option(
+    "-r2", "--p-omic2-value-regex", required=False, default="",
+    help="Path to a list of omic2 regex to subset from "
+         "column passed to `-f1` (regex accepted)."
+)
+@click.option(
     "-q2", "--p-omic2-quant", required=False, default=0, type=int,
     help="Filtering quantile / percentile for omic2 features based on"
          " column passed to `-f2` (must be between 0 and 100)."
@@ -96,7 +106,7 @@ from Xmmvec import __version__
     help="List of omic2 features to subset (regex accepted)."
 )
 @click.option(
-    "-x2", "--p-omic2-max", default=50, show_default=True, type=int,
+    "-x2", "--p-omic2-max", default=0, show_default=True, type=int,
     help="Maximum number of co-occurrences per omic2 feature."
 )
 @click.option(
@@ -108,7 +118,7 @@ from Xmmvec import __version__
     help="initial number of co-occurrences per feature."
 )
 @click.option(
-    "-col", "--p-color-palette", default='rainbow', show_default=True,
+    "-col", "--p-color-palette", default='blues', show_default=True,
     type=click.Choice(['blues', 'greens', 'oranges', 'reds', 'purples', 'greys', 'viridis',
                        'magma', 'inferno', 'plasma', 'bluegreen', 'bluepurple', 'greenblue',
                        'orangered', 'purplebluegreen', 'purpleblue', 'purplered', 'redpurple',
@@ -117,6 +127,10 @@ from Xmmvec import __version__
                        'purpleorange', 'redblue', 'redgrey', 'redyellowblue', 'redyellowgreen',
                        'spectral', 'rainbow', 'sinebow']),
     help="Color palette for the heatmap."
+)
+@click.option(
+    "-top", "--p-color-top", default='white', show_default=True,
+    type=str, help="Color for the top co-occurrences labels."
 )
 @click.option(
     "--verbose/--no-verbose", default=False
@@ -132,6 +146,7 @@ def standalone_xmmvec(
         p_omic1_column,
         p_omic1_filt,
         p_omic1_value,
+        p_omic1_value_regex,
         p_omic1_quant,
         p_omic1_name,
         p_omic1_list,
@@ -140,6 +155,7 @@ def standalone_xmmvec(
         p_omic2_column,
         p_omic2_filt,
         p_omic2_value,
+        p_omic2_value_regex,
         p_omic2_quant,
         p_omic2_name,
         p_omic2_list,
@@ -147,6 +163,7 @@ def standalone_xmmvec(
         p_min_probability,
         p_pair_number,
         p_color_palette,
+        p_color_top,
         verbose
 ):
 
@@ -158,6 +175,7 @@ def standalone_xmmvec(
         p_omic1_column,
         p_omic1_filt,
         p_omic1_value,
+        p_omic1_value_regex,
         p_omic1_quant,
         p_omic1_name,
         p_omic1_list,
@@ -166,6 +184,7 @@ def standalone_xmmvec(
         p_omic2_column,
         p_omic2_filt,
         p_omic2_value,
+        p_omic2_value_regex,
         p_omic2_quant,
         p_omic2_name,
         p_omic2_list,
@@ -173,6 +192,7 @@ def standalone_xmmvec(
         p_min_probability,
         p_pair_number,
         p_color_palette,
+        p_color_top,
         verbose
     )
 
