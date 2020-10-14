@@ -118,7 +118,7 @@ from Xmmvec import __version__
     help="initial number of co-occurrences per feature."
 )
 @click.option(
-    "-col", "--p-color-palette", default='blues', show_default=True,
+    "-col", "--p-color-palette", default='viridis', show_default=True,
     type=click.Choice(['blues', 'greens', 'oranges', 'reds', 'purples', 'greys', 'viridis',
                        'magma', 'inferno', 'plasma', 'bluegreen', 'bluepurple', 'greenblue',
                        'orangered', 'purplebluegreen', 'purpleblue', 'purplered', 'redpurple',
