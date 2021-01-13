@@ -155,7 +155,7 @@ def merge_metadata(ranks_pd: pd.DataFrame,
         print(ranks_pd)
         print(omic_metadata)
         print(omic, omic_column)
-        print(omic_metadata[[omic, omic_column])
+        print(omic_metadata[[omic, omic_column]])
         ranks_pd = ranks_pd.merge(omic_metadata[[omic, omic_column]], on=omic, how='left')
         omic_column_new = '%s: %s' % (omic, omic_column)
         ranks_pd.rename(columns={omic_column: omic_column_new}, inplace=True)
