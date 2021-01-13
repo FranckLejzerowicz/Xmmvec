@@ -476,6 +476,8 @@ def xmmvec(
         print('Dealing with:')
         print(' - omic1 (matrix columns): ', omic1)
         print(' - omic2 (matrix rows):    ', omic2)
+    print(omic1)
+    print(omic2)
 
     if i_tree_taxonomy:
         i_tree_taxonomy = check_path(i_tree_taxonomy)
@@ -484,7 +486,7 @@ def xmmvec(
         ranks_pd = get_subset(ranks_pd, p_omic1_list, 0)
     if p_omic2_list:
         ranks_pd = get_subset(ranks_pd, p_omic2_list, 1)
-
+    print(ranks_pd)
     omic1_metadata = pd.DataFrame()
     omic2_metadata = pd.DataFrame()
     omic1_column = ''
@@ -496,7 +498,8 @@ def xmmvec(
         omic2_metadata, omic2_column = get_metadata(p_omic2_metadata, p_omic2_column, omic2)
         if verbose:
             print('done.')
-
+    print(omic1_metadata)
+    print(omic2_metadata)
     if p_omic1_filt or p_omic1_filt:
         if verbose:
             print('Filter using metadata...', end='')
