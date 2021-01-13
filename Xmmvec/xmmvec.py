@@ -523,6 +523,13 @@ def xmmvec(
     if omic1_metadata.shape[0] or omic2_metadata.shape[0]:
         if verbose:
             print('Merge metadata...', end='')
+        print(ranks_pd)
+        print(omic1_metadata)
+        print(omic1_column)
+        print(omic1)
+        print(omic2_metadata)
+        print(omic2_column)
+        print(omic2)
         ranks_pd, omic1_column_new = merge_metadata(ranks_pd, omic1_metadata, omic1_column, omic1)
         ranks_pd, omic2_column_new = merge_metadata(ranks_pd, omic2_metadata, omic2_column, omic2)
         if verbose:
