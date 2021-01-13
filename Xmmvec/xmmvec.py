@@ -152,12 +152,6 @@ def merge_metadata(ranks_pd: pd.DataFrame,
                    omic_metadata: pd.DataFrame,
                    omic_column: str, omic: str) -> (pd.DataFrame, str):
     if omic_column:
-        print(ranks_pd)
-        print(ranks_pd[omic])
-        print(omic_metadata)
-        print(omic, omic_column)
-        print(omic_metadata[[omic, omic_column]])
-        print(omic_metadata[omic])
         ranks_pd = ranks_pd.merge(omic_metadata[[omic, omic_column]], on=omic, how='left')
         omic_column_new = '%s: %s' % (omic, omic_column)
         ranks_pd.rename(columns={omic_column: omic_column_new}, inplace=True)
@@ -517,6 +511,8 @@ def xmmvec(
     ranks_pd = ranks_pd.loc[(~ranks_pd.isna().all(1)), (~ranks_pd.isna().all())]
     ranks_pd = ranks_pd.unstack().reset_index()
     ranks_pd.columns = [omic1, omic2, 'conditionals']
+    ranks_pd[omic1] = ranks_pd[omic1].astype(str)
+    ranks_pd[omic2] = ranks_pd[omic2].astype(str)
     ranks_pd['ranked_conditionals'] = ranks_pd.conditionals.rank(ascending=False)
     ranks_pd = add_ranks(ranks_pd, omic1)
     ranks_pd = add_ranks(ranks_pd, omic2)
