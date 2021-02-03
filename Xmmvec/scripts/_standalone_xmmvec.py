@@ -64,7 +64,7 @@ from Xmmvec import __version__
     help="List of omic1 features to subset (regex accepted)."
 )
 @click.option(
-    "-x1", "--p-omic1-max", default=0, show_default=True, type=int,
+    "-x1", "--p-omic1-max", default=10, show_default=True, type=int,
     help="Maximum number of co-occurrences per omic1 feature."
 )
 @click.option(
@@ -106,7 +106,7 @@ from Xmmvec import __version__
     help="List of omic2 features to subset (regex accepted)."
 )
 @click.option(
-    "-x2", "--p-omic2-max", default=0, show_default=True, type=int,
+    "-x2", "--p-omic2-max", default=10, show_default=True, type=int,
     help="Maximum number of co-occurrences per omic2 feature."
 )
 @click.option(
@@ -114,7 +114,7 @@ from Xmmvec import __version__
     help="Minimum conditional probability."
 )
 @click.option(
-    "-n", "--p-pair-number", default=10, show_default=True, type=int,
+    "-n", "--p-pair-number", default=20, show_default=True, type=int,
     help="initial number of co-occurrences per feature."
 )
 @click.option(

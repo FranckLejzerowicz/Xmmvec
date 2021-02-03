@@ -298,7 +298,7 @@ def make_figure(ranks_pd: pd.DataFrame, o_ranks_explored: str,
     if p_pair_number > max_rank1:
         init1 = max_rank1
     slider1 = alt.binding_range(min=1, max=max_rank1, step=1,
-                                name='max. rank of %s per each %s:' % (omic2, omic1))
+                                name='Maximum number of %s for each %s:' % (omic2, omic1))
     selector1 = alt.selection_single(name="cutoff1", fields=['cutoff1'],
                                      bind=slider1, init={'cutoff1': init1})
 
@@ -307,7 +307,7 @@ def make_figure(ranks_pd: pd.DataFrame, o_ranks_explored: str,
     if p_pair_number > max_rank2:
         init2 = max_rank2
     slider2 = alt.binding_range(min=1, max=max_rank2, step=1,
-                                name='max. rank of %s per each %s:' % (omic1, omic2))
+                                name='Maximum number of %s for each %s:' % (omic1, omic2))
     selector2 = alt.selection_single(name="cutoff2", fields=['cutoff2'],
                                      bind=slider2, init={'cutoff2': init2})
 
@@ -315,11 +315,11 @@ def make_figure(ranks_pd: pd.DataFrame, o_ranks_explored: str,
     mlt2 = alt.selection_multi(fields=[omic2], toggle=True)
 
     slider_label1 = alt.binding_range(min=0, max=max_rank1, step=1,
-                                      name='top %s per %s:' % (omic2, omic1))
+                                      name='Label this much top %s per %s:' % (omic2, omic1))
     label1 = alt.selection_single(name="cutoff_label1", fields=['cutoff_label1'],
                                   bind=slider_label1, init={'cutoff_label1': 0})
     slider_label2 = alt.binding_range(min=0, max=max_rank2, step=1,
-                                      name='top %s per %s:' % (omic1, omic2))
+                                      name='Label this much top %s per %s:' % (omic1, omic2))
     label2 = alt.selection_single(name="cutoff_label2", fields=['cutoff_label2'],
                                   bind=slider_label2, init={'cutoff_label2': 0})
 
