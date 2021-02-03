@@ -339,11 +339,11 @@ def make_figure(ranks_pd: pd.DataFrame, o_ranks_explored: str,
     rect = alt.Chart(ranks_st).mark_rect().encode(
         x=alt.X('%s:O' % omic1, sort=sorted_omic1,
                 axis=alt.Axis(
-                    labelOverlap=False, labelFontSize=6,
+                    labelOverlap=False, labelFontSize=6, labelLimit=500,
                     orient='top', labelAngle=45, titleFontSize=0)),
         y=alt.Y('%s:O' % omic2, sort=sorted_omic2,
                 axis=alt.Axis(
-                    labelOverlap=False, labelFontSize=6, titleFontSize=0)),
+                    labelOverlap=False, labelFontSize=6, titleFontSize=0,  labelLimit=500)),
         color=alt.Color('rank:Q', legend=alt.Legend(orient='left'), sort="descending",
                         scale=alt.Scale(scheme=p_color_palette)),
         tooltip=tooltips
