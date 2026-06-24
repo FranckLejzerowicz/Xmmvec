@@ -41,7 +41,7 @@ from Xmmvec import __version__
          " filtering based on values of `-v1`."
 )
 @click.option(
-    "-v1", "--p-omic1-value", required=False, default=(,), multiple=True,
+    "-v1", "--p-omic1-value", required=False, default=(), multiple=True,
     help="Filtering value for omic1 features based on"
          " column passed to `-f1`."
 )
@@ -83,7 +83,7 @@ from Xmmvec import __version__
          " filtering based on values of `-v2`."
 )
 @click.option(
-    "-v2", "--p-omic2-value", required=False, default=(,), multiple=True,
+    "-v2", "--p-omic2-value", required=False, default=(), multiple=True,
     help="Filtering value for omic2 features based on"
          " column passed to `-f2`."
 )
@@ -166,14 +166,6 @@ def standalone_xmmvec(
         p_color_top,
         verbose
 ):
-    print(i_ranks_path)
-    print(o_ranks_explored)
-    print(i_tree_taxonomy)
-    print(p_omic1_metadata)
-    print(p_omic1_column)
-    print(p_omic1_filt)
-    print(p_omic1_value)
-    print(p_omic1_value_regex)
     xmmvec(
         i_ranks_path,
         o_ranks_explored,
