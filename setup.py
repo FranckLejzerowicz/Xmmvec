@@ -54,7 +54,7 @@ setup(
         "click >= 6.7",
         'pandas >= 0.19.0',
         'numpy >= 1.12.1',
-        'altair >= 4.1.0',
+        'altair >= 5.5.0',
     ],
     classifiers=classifiers,
     entry_points={'console_scripts': standalone},

@@ -120,7 +120,6 @@ def get_filter(omic_metadata: pd.DataFrame, p_omic_filt: str, p_omic_value: str,
 
 
 def get_col_bool_sign(omic_metadata_col: pd.Series, signs_vals: list) -> pd.Series:
-
     if signs_vals[0][0] == '<':
         omic_metadata_bool = omic_metadata_col.astype(float) < signs_vals[0][1]
     elif signs_vals[0][0] == '>':
@@ -131,7 +130,6 @@ def get_col_bool_sign(omic_metadata_col: pd.Series, signs_vals: list) -> pd.Seri
         omic_metadata_bool = omic_metadata_col.astype(float) >= signs_vals[0][1]
     else:
         raise IOError("Sign %s none of ['<', '>', '<=', '>=']" % signs_vals[0][0])
-
     if len(signs_vals) == 2:
         if signs_vals[1][0] == '<':
             omic_metadata_bool2 = omic_metadata_col.astype(float) < signs_vals[1][1]
@@ -169,23 +167,23 @@ def add_ranks(ranks_pd: pd.DataFrame, omic: str) -> pd.DataFrame:
     return pd.concat(new_cols)
 
 
-def get_stacked(ranks_pd: pd.DataFrame, omic1_column: str,
-                omic2_column: str, omic1: str, omic2: str) -> pd.DataFrame:
+def get_stacked(ranks_pd: pd.DataFrame, omic1_column_new: str,
+                omic2_column_new: str, omic1: str, omic2: str) -> pd.DataFrame:
     if omic1_column and omic2_column:
         ranks_st = ranks_pd.set_index(
-            [omic1, omic2, omic1_column, omic2_column]
+            [omic1, omic2, omic1_column_new, omic2_column_new]
         ).stack().reset_index().rename(
             columns={'level_4': 'conditional', 0: 'rank'}
         )
     elif omic1_column:
         ranks_st = ranks_pd.set_index(
-            [omic1, omic2, omic1_column]
+            [omic1, omic2, omic1_column_new]
         ).stack().reset_index().rename(
             columns={'level_3': 'conditional', 0: 'rank'}
         )
     elif omic2_column:
         ranks_st = ranks_pd.set_index(
-            [omic1, omic2, omic2_column]
+            [omic1, omic2, omic2_column_new]
         ).stack().reset_index().rename(
             columns={'level_3': 'conditional', 0: 'rank'}
         )
@@ -212,7 +210,6 @@ def get_bar_chart(ranks_st: pd.DataFrame, sorted_omic: list,
                   omic_column: str, omic: str, omic1: str,
                   omic2: str, x_size: float, y_size: float,
                   mlt, selector1, selector2):
-
     if omic == omic1:
         x = alt.X('%s:N' % omic1, sort=sorted_omic, axis=None)
         y = alt.Y('mean(rank):Q', axis=alt.Axis(titleFontSize=8))
@@ -227,7 +224,8 @@ def get_bar_chart(ranks_st: pd.DataFrame, sorted_omic: list,
     if omic_column:
         color = alt.condition(mlt, omic_column, alt.ColorValue("grey"))
     else:
-        color = alt.condition(mlt, alt.ColorValue("steelblue"), alt.ColorValue("grey"))
+        color = alt.condition(mlt, alt.ColorValue("steelblue"),
+                              alt.ColorValue("grey"))
 
     tooltips = [
         omic, 'mean(rank)', 'stdev(rank)',
@@ -238,14 +236,14 @@ def get_bar_chart(ranks_st: pd.DataFrame, sorted_omic: list,
 
     bar_omic = alt.Chart(ranks_st).mark_bar().encode(
         x=x, y=y, color=color, tooltip=tooltips
-    ).add_selection(
+    ).add_params(
         mlt, selector1, selector2
     ).transform_filter(
         alt.FieldEqualPredicate(field='conditional', equal='conditionals')
     ).transform_filter(
-        alt.datum[conditionals_1] <= selector1.cutoff1
+        alt.datum[conditionals_1] <= selector1
     ).transform_filter(
-        alt.datum[conditionals_2] <= selector2.cutoff2
+        alt.datum[conditionals_2] <= selector2
     ).properties(
         width=width,
         height=height
@@ -259,24 +257,19 @@ def make_figure(ranks_pd: pd.DataFrame, o_ranks_explored: str,
                 p_omic1_filt: str, p_omic1_value: str,
                 p_omic2_filt: str, p_omic2_value: str,
                 p_omic1_max: int, p_omic2_max: int, p_color_top: str) -> None:
-
     conditionals_1 = 'conditionals_per_%s' % omic1
     conditionals_2 = 'conditionals_per_%s' % omic2
-
     if p_omic1_max:
         ranks_pd = ranks_pd.loc[ranks_pd[conditionals_1] <= p_omic1_max, :]
     if p_omic2_max:
         ranks_pd = ranks_pd.loc[ranks_pd[conditionals_2] <= p_omic2_max, :]
-
     ranks_pd2merge = ranks_pd[[omic1, omic2, conditionals_1, conditionals_2]]
     ranks_st = get_stacked(ranks_pd, omic1_column, omic2_column, omic1, omic2)
     ranks_st = ranks_st.merge(ranks_pd2merge, on=[omic1, omic2], how='left')
-
     text = ["\n\nCo-occurrence matrix exploration tool (mmvec)",
             "%s (%s features) vs. %s (%s features)" % (
                 omic1, ranks_st[omic1].unique().size,
-                omic2, ranks_st[omic2].unique().size)
-            ]
+                omic2, ranks_st[omic2].unique().size)]
     subtext = []
     if p_omic1_filt and p_omic1_value:
         subtext.append("Subset %s for '%s' in '%s'" % (
@@ -285,49 +278,45 @@ def make_figure(ranks_pd: pd.DataFrame, o_ranks_explored: str,
         subtext.append("Subset %s for '%s' in '%s'" % (
             omic2, ', '.join(list(p_omic1_value)), p_omic2_filt))
 
-    conditionals = ['conditionals', 'ranked_conditionals', conditionals_1, conditionals_2]
-    conditionals_radio = alt.binding_radio(options=conditionals, name="Co-occurrence measure")
-    conditionals_select = alt.selection_single(
-        fields=['conditional'],
-        bind=conditionals_radio,
-        init={'conditional': 'conditionals'}
-    )
+    conditionals = [
+        'conditionals', 'ranked_conditionals', conditionals_1, conditionals_2]
+    conditionals_radio = alt.binding_select(
+        options=conditionals, name="Co-occurrence measure: ")
+    conditionals_select = alt.param(
+        name='conditional', bind=conditionals_radio, value='conditionals')
+    max_rank1 = int(ranks_st[conditionals_1].max())
 
     max_rank1 = int(ranks_st[conditionals_1].max())
+    max_rank2 = int(ranks_st[conditionals_2].max())
     init1 = p_pair_number
+    init2 = p_pair_number
     if p_pair_number > max_rank1:
         init1 = max_rank1
-    slider1 = alt.binding_range(min=1, max=max_rank1, step=1,
-                                name='Maximum number of %s for each %s:' % (omic2, omic1))
-    selector1 = alt.selection_single(name="cutoff1", fields=['cutoff1'],
-                                     bind=slider1, init={'cutoff1': init1})
-
-    max_rank2 = int(ranks_st[conditionals_2].max())
-    init2 = p_pair_number
     if p_pair_number > max_rank2:
         init2 = max_rank2
-    slider2 = alt.binding_range(min=1, max=max_rank2, step=1,
-                                name='Maximum number of %s for each %s:' % (omic1, omic2))
-    selector2 = alt.selection_single(name="cutoff2", fields=['cutoff2'],
-                                     bind=slider2, init={'cutoff2': init2})
 
-    mlt1 = alt.selection_multi(fields=[omic1], toggle=True)
-    mlt2 = alt.selection_multi(fields=[omic2], toggle=True)
-
-    slider_label1 = alt.binding_range(min=0, max=max_rank1, step=1,
-                                      name='Label this much top %s per %s:' % (omic2, omic1))
-    label1 = alt.selection_single(name="cutoff_label1", fields=['cutoff_label1'],
-                                  bind=slider_label1, init={'cutoff_label1': 0})
-    slider_label2 = alt.binding_range(min=0, max=max_rank2, step=1,
-                                      name='Label this much top %s per %s:' % (omic1, omic2))
-    label2 = alt.selection_single(name="cutoff_label2", fields=['cutoff_label2'],
-                                  bind=slider_label2, init={'cutoff_label2': 0})
-
-    sorted_omic1 = get_sorted(ranks_st, omic1_column, omic1)
-    sorted_omic2 = get_sorted(ranks_st, omic2_column, omic2)
-
-    tooltips = [omic1, omic2, 'conditional', 'rank',
-                conditionals_1, conditionals_2]
+    slider1 = alt.binding_range(
+        min=1, max=max_rank1, step=1,
+        name='Maximum number of %s for each %s:' % (omic2, omic1))
+    slider2 = alt.binding_range(
+        min=1, max=max_rank2, step=1,
+        name='Maximum number of %s for each %s:' % (omic1, omic2))
+    slider_label1 = alt.binding_range(
+        min=0, max=max_rank1, step=1,
+        name='Label this much top %s per %s:' % (omic2, omic1))
+    slider_label2 = alt.binding_range(
+        min=0, max=max_rank2, step=1,
+        name='Label this much top %s per %s:' % (omic1, omic2))
+    selector1 = alt.param(name="cutoff1", bind=slider1, value=init1)
+    selector2 = alt.param(name="cutoff2", bind=slider2, value=init2)
+    label1 = alt.param(name="cutoff_label1", bind=slider_label1, value=0)
+    label2 = alt.param(name="cutoff_label2", bind=slider_label2, value=0)
+    mlt1 = alt.selection_point(fields=[omic1], toggle=True)
+    mlt2 = alt.selection_point(fields=[omic2], toggle=True)
+    sorted_omic1 = get_sorted(ranks_st, omic1_column_new, omic1)
+    sorted_omic2 = get_sorted(ranks_st, omic2_column_new, omic2)
+    tooltips = [
+        omic1, omic2, 'conditional', 'rank', conditionals_1, conditionals_2]
 
     if omic1_column:
         tooltips.append(omic1_column)
@@ -347,22 +336,21 @@ def make_figure(ranks_pd: pd.DataFrame, o_ranks_explored: str,
         color=alt.Color('rank:Q', legend=alt.Legend(orient='left'), sort="descending",
                         scale=alt.Scale(scheme=p_color_palette)),
         tooltip=tooltips
-    ).add_selection(
+    ).add_params(
         conditionals_select, mlt1, mlt2, selector1, selector2
     ).transform_filter(
-        conditionals_select
+        "datum.conditional == conditional"
     ).transform_filter(
         mlt1
     ).transform_filter(
         mlt2
     ).transform_filter(
-        alt.datum[conditionals_1] <= selector1.cutoff1
+        alt.datum[conditionals_1] <= selector1
     ).transform_filter(
-        alt.datum[conditionals_2] <= selector2.cutoff2
+        alt.datum[conditionals_2] <= selector2
     ).properties(
         width=x_size, height=y_size,
     )
-
     circ = alt.Chart(ranks_st).mark_point(size=5, shape='diamond').encode(
         x=alt.X('%s:O' % omic1, sort=sorted_omic1,
                 axis=alt.Axis(
@@ -373,7 +361,7 @@ def make_figure(ranks_pd: pd.DataFrame, o_ranks_explored: str,
                     labelOverlap=False, labelFontSize=6, titleFontSize=0)),
         color=alt.ColorValue(p_color_top),
         tooltip=tooltips
-    ).add_selection(
+    ).add_params(
         label1, label2
     ).transform_filter(
         conditionals_select
@@ -382,17 +370,16 @@ def make_figure(ranks_pd: pd.DataFrame, o_ranks_explored: str,
     ).transform_filter(
         mlt2
     ).transform_filter(
-        alt.datum[conditionals_1] <= selector1.cutoff1
+        alt.datum[conditionals_1] <= selector1
     ).transform_filter(
-        alt.datum[conditionals_2] <= selector2.cutoff2
+        alt.datum[conditionals_2] <= selector2
     ).transform_filter(
-        alt.datum[conditionals_1] <= label1.cutoff_label1
+        alt.datum[conditionals_1] <= label1
     ).transform_filter(
-        alt.datum[conditionals_2] <= label2.cutoff_label2
+        alt.datum[conditionals_2] <= label2
     ).properties(
         width=x_size, height=y_size
     )
-
     bar_omic1 = get_bar_chart(ranks_st, sorted_omic1, conditionals_1, conditionals_2,
                               omic1_column, omic1, omic1, omic2, x_size, y_size,
                               mlt1, selector1, selector2)
@@ -400,12 +387,8 @@ def make_figure(ranks_pd: pd.DataFrame, o_ranks_explored: str,
                               omic2_column, omic2, omic1, omic2, x_size, y_size,
                               mlt2, selector1, selector2)
 
-    chart = alt.vconcat(
-        alt.hconcat((rect + circ), bar_omic2),
-        bar_omic1
-    )
-
-    chart.resolve_legend(
+    chart = alt.vconcat(alt.hconcat((rect + circ), bar_omic2), bar_omic1)
+    chart = chart.resolve_legend(
         color="independent",
         size="independent"
     ).configure_axis(
@@ -420,9 +403,9 @@ def make_figure(ranks_pd: pd.DataFrame, o_ranks_explored: str,
             "subtitle": (subtext + ["(based on altair)"]),
             "color": "black",
             "subtitleColor": "grey"
-        }
+        },
+        padding={"left": 50, "top": 40, "right": 40, "bottom": 40}
     )
-
     if not isdir(dirname(o_ranks_explored)):
         os.makedirs(dirname(o_ranks_explored))
     chart.save(o_ranks_explored)
@@ -519,13 +502,15 @@ def xmmvec(
     if verbose:
         print('done.')
 
-    omic1_column_new = ''
-    omic2_column_new = ''
+    omic1_column_new = omic1_column
+    omic2_column_new = omic2_column
     if omic1_metadata.shape[0] or omic2_metadata.shape[0]:
         if verbose:
             print('Merge metadata...', end='')
-        ranks_pd, omic1_column_new = merge_metadata(ranks_pd, omic1_metadata, omic1_column, omic1)
-        ranks_pd, omic2_column_new = merge_metadata(ranks_pd, omic2_metadata, omic2_column, omic2)
+        ranks_pd, omic1_column_new = merge_metadata(
+            ranks_pd, omic1_metadata, omic1_column, omic1)
+        ranks_pd, omic2_column_new = merge_metadata(
+            ranks_pd, omic2_metadata, omic2_column, omic2)
         if verbose:
             print('done.')
 
@@ -535,7 +520,8 @@ def xmmvec(
         else:
             raise IOError('Output file name must end with ".html')
     else:
-        ranks_explored = '%s-p%s-n%s.html' % (splitext(i_ranks_path)[0], p_min_probability, p_pair_number)
+        ranks_explored = '%s-p%s-n%s.html' % (
+            splitext(i_ranks_path)[0], p_min_probability, p_pair_number)
 
     if verbose:
         print('Make figure:')
