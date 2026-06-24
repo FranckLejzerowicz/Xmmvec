@@ -151,7 +151,7 @@ def merge_metadata(ranks_pd: pd.DataFrame,
                    omic_column: str, omic: str) -> (pd.DataFrame, str):
     if omic_column:
         ranks_pd = ranks_pd.merge(omic_metadata[[omic, omic_column]], on=omic, how='left')
-        omic_column_new = '%s: %s' % (omic, omic_column)
+        omic_column_new = '%s_%s' % (omic, omic_column)
         ranks_pd.rename(columns={omic_column: omic_column_new}, inplace=True)
     else:
         omic_column_new = ''
@@ -169,19 +169,19 @@ def add_ranks(ranks_pd: pd.DataFrame, omic: str) -> pd.DataFrame:
 
 def get_stacked(ranks_pd: pd.DataFrame, omic1_column_new: str,
                 omic2_column_new: str, omic1: str, omic2: str) -> pd.DataFrame:
-    if omic1_column and omic2_column:
+    if omic1_column_new and omic2_column_new:
         ranks_st = ranks_pd.set_index(
             [omic1, omic2, omic1_column_new, omic2_column_new]
         ).stack().reset_index().rename(
             columns={'level_4': 'conditional', 0: 'rank'}
         )
-    elif omic1_column:
+    elif omic1_column_new:
         ranks_st = ranks_pd.set_index(
             [omic1, omic2, omic1_column_new]
         ).stack().reset_index().rename(
             columns={'level_3': 'conditional', 0: 'rank'}
         )
-    elif omic2_column:
+    elif omic2_column_new:
         ranks_st = ranks_pd.set_index(
             [omic1, omic2, omic2_column_new]
         ).stack().reset_index().rename(
@@ -284,7 +284,6 @@ def make_figure(ranks_pd: pd.DataFrame, o_ranks_explored: str,
         options=conditionals, name="Co-occurrence measure: ")
     conditionals_select = alt.param(
         name='conditional', bind=conditionals_radio, value='conditionals')
-    max_rank1 = int(ranks_st[conditionals_1].max())
 
     max_rank1 = int(ranks_st[conditionals_1].max())
     max_rank2 = int(ranks_st[conditionals_2].max())
@@ -313,8 +312,8 @@ def make_figure(ranks_pd: pd.DataFrame, o_ranks_explored: str,
     label2 = alt.param(name="cutoff_label2", bind=slider_label2, value=0)
     mlt1 = alt.selection_point(fields=[omic1], toggle=True)
     mlt2 = alt.selection_point(fields=[omic2], toggle=True)
-    sorted_omic1 = get_sorted(ranks_st, omic1_column_new, omic1)
-    sorted_omic2 = get_sorted(ranks_st, omic2_column_new, omic2)
+    sorted_omic1 = get_sorted(ranks_st, omic1_column, omic1)
+    sorted_omic2 = get_sorted(ranks_st, omic2_column, omic2)
     tooltips = [
         omic1, omic2, 'conditional', 'rank', conditionals_1, conditionals_2]
 
